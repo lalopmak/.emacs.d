@@ -73,9 +73,14 @@
 ;; configuration, but minibuffer-complete otherwise dominates the 
 ;; tab binding because of my custom tab-completion-everywhere 
 ;; configuration.
-(add-hook 'ido-setup-hook 
-          (lambda () 
-            (define-key ido-completion-map [tab] 'ido-complete)))
+(defmacro add-ido-hook (key hook)
+  `(add-hook 'ido-setup-hook 
+             (lambda () 
+               (define-key ido-completion-map ,key ,hook))))
+
+(add-ido-hook [tab] 'ido-next-match)
+(add-ido-hook [up] 'ido-prev-match)
+(add-ido-hook [down] 'ido-next-match)
 
 
 
