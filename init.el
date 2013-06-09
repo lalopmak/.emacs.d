@@ -45,7 +45,7 @@
 
 ;;tango color theme
 (require-or-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
-(add-to-list 'custom-theme-load-path (init-git-package-directory package))
+(add-to-list 'custom-theme-load-path (init-git-package-directory 'color-theme-tangotango))
 (load-theme 'tangotango t)
 
 
