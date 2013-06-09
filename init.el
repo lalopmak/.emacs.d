@@ -54,6 +54,10 @@
 (recentf-mode 1)
 (setq recentf-max-menu-items 50)
 
+
+(yas--initialize)
+
+
 ;; (iswitchb-mode t)
 (require 'ido)
 (ido-mode 'both) ;; for buffers and files
@@ -82,9 +86,15 @@
 (add-ido-hook [up] 'ido-prev-match)
 (add-ido-hook [down] 'ido-next-match)
 
+(defun file-visited-by (name)
+  "Returns name of file visited by buffer [name], or nil if it's not visiting any" 
+  (buffer-file-name (get-buffer-create name)))
 
+(defun active-and-not-visiting-file (name)
+ (and (get-buffer name) (not (file-visited-by name)) )) 
 
-(yas--initialize)
+(add-to-list 'ido-ignore-buffers 'active-and-not-visiting-file)
+
 
 (ido-vertical-mode t)
 
