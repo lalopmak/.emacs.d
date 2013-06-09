@@ -10,18 +10,49 @@
    (or (package-installed-p package) 
        (package-install package))
    (require package))
- '(dired+ magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous evil))
+ '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous ))
 
 ;;installs the following packages (without loading) if necessary
 (mapc
  (lambda (package)
    (or (package-installed-p package) 
        (package-install package)))
- '(auctex))
+ '(dired+ auctex color-theme))
+
+;;the base directory for git packages
+(defvar init-git-directory "~/.emacs.d/git-packages/") 
+
+;;the directory in which this git package would be installed
+(defun init-git-package-directory (package) (file-truename  (concat init-git-directory (symbol-name package)))) 
+
+;;requires packageName, fetching from git url if necessary
+(defun require-or-git-clone (package url) 
+  (let ((packageDir (init-git-package-directory package))) 
+    (add-to-list 'load-path packageDir)
+    (unless (require package nil 'noerror)
+      (let* ((git (or (executable-find "git")
+                      (error "Unable to find `git'")))
+             (status  
+              (call-process
+               git nil nil nil "--no-pager" "clone" "-v" url packageDir)))
+        (if (zerop status)
+            (require package)
+          (error "Couldn't clone %s from the Git repository: %s" package url))))))
+
+;;evil
+(require-or-git-clone 'evil "git://gitorious.org/evil/evil.git" )
+(require-or-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
+
+;;tango color theme
+(require-or-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
+(add-to-list 'custom-theme-load-path (init-git-package-directory package))
+(load-theme 'tangotango t)
+
+
 
 (require 'recentf)
-    (recentf-mode 1)
-    (setq recentf-max-menu-items 50)
+(recentf-mode 1)
+(setq recentf-max-menu-items 50)
 
 ;; (iswitchb-mode t)
 (require 'ido)
@@ -72,13 +103,6 @@
 (global-linum-mode t)
 
 (set-scroll-bar-mode 'right)   ; replace 'right with 'left to place it to the left
-;;(set-face-background 'scroll-bar "red")
-
-
-;;(require 'color-theme)
-;;    (color-theme-initialize)
-;;    (color-theme-late-night)
-
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -89,10 +113,7 @@
 
 (evil-mode 1)
 
-(add-to-list 'load-path "~/.emacs.d/lalopmak-evil")
-(require 'lalopmak-evil)
-
-    (show-paren-mode 1)
+(show-paren-mode 1)
 
 (setq TeX-auto-save t)
 (setq TeX-parse-self t)
@@ -106,3 +127,5 @@
         (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
 
 (add-hook 'LaTeX-mode-hook 'flymake-mode)	
+
+
