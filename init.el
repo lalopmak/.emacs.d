@@ -115,6 +115,12 @@
 
 (show-paren-mode 1)
 
+;;byte-compiles .el files upon save
+(add-hook 'after-save-hook 
+          (lambda ()
+            (if (eq major-mode 'emacs-lisp-mode)
+                (save-excursion (byte-compile-file buffer-file-name)))))
+
 (setq TeX-auto-save t)
 (setq TeX-parse-self t)
 (setq TeX-save-query nil)
