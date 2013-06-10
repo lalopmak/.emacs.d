@@ -23,7 +23,7 @@
 (defvar init-git-directory "~/.emacs.d/git-packages/") 
 
 ;;the directory in which this git package would be installed
-(defun init-git-package-directory (package) (file-truename  (concat init-git-directory (symbol-name package)))) 
+(cl-defun init-git-package-directory (package &optional (baseDir init-git-directory)) (file-truename  (concat baseDir (symbol-name package)))) 
 
 ;;requires packageName, fetching from git url if necessary
 (defun require-or-git-clone (package url) 
@@ -49,6 +49,35 @@
 (load-theme 'tangotango t)
 
 
+
+(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+
+(unless (require 'el-get nil 'noerror)
+  (with-current-buffer
+      (url-retrieve-synchronously
+       "https://raw.github.com/dimitri/el-get/master/el-get-install.el")
+    (goto-char (point-max))
+    (eval-print-last-sexp)))
+
+(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
+
+(setq
+ el-get-sources
+ '(el-get				; el-get is self-hosting
+  kill-ring-ido)) 
+
+;;adds the fetched el-get packages to load-path and requires them
+(mapc
+ (lambda (package)
+   (add-to-list 'load-path (init-git-package-directory package "/home/yourname/.emacs.d/el-get/"))
+   (require package))
+ el-get-sources)
+
+(el-get 'sync el-get-sources)
+
+;; (require 'kill-ring-ido)
+(global-set-key (kbd "M-y") 'kill-ring-ido)
+(setq kill-ring-ido-shortage-length 24) 
 
 (require 'recentf)
 (recentf-mode 1)
@@ -149,4 +178,9 @@
 
 (add-hook 'LaTeX-mode-hook 'flymake-mode)	
 
+;; ;;fix copy paste?
+;; ;; after copy Ctrl+c in X11 apps, you can paste by `yank' in emacs
+;; (setq x-select-enable-clipboard t)
 
+;; ;; after mouse selection in X11, you can paste by `yank' in emacs
+;; (setq x-select-enable-primary t)
