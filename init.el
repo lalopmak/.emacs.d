@@ -4,20 +4,22 @@
 
 (package-initialize)
 
+(defmacro do-to-package-list (packageList &rest body)
+  "Does something to each package of a package list"
+  `(mapc (lambda (package) ,@body ) ,packageList)) 
+
+(defun install-if-necessary (package)
+  (or (package-installed-p package) 
+      (package-install package)))
+
 ;; loads the listed packages, installing if necessary
-(mapc
- (lambda (package)
-   (or (package-installed-p package) 
-       (package-install package))
-   (require package))
- '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous ))
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous)
+                         (install-if-necessary package)
+                         (require package))
 
 ;;installs the following packages (without loading) if necessary
-(mapc
- (lambda (package)
-   (or (package-installed-p package) 
-       (package-install package)))
- '(dired+ auctex color-theme))
+(do-to-package-list '(dired+ auctex color-theme)
+                         (install-if-necessary package))
 
 ;;the base directory for git packages
 (defvar init-git-directory "~/.emacs.d/git-packages/") 
@@ -67,11 +69,9 @@
   kill-ring-ido)) 
 
 ;;adds the fetched el-get packages to load-path and requires them
-(mapc
- (lambda (package)
-   (add-to-list 'load-path (init-git-package-directory package "/home/yourname/.emacs.d/el-get/"))
-   (require package))
- el-get-sources)
+(do-to-package-list el-get-sources
+                         (add-to-list 'load-path (init-git-package-directory package "/home/yourname/.emacs.d/el-get/"))
+                         (require package))                      
 
 (el-get 'sync el-get-sources)
 
