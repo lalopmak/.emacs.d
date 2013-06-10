@@ -9,6 +9,7 @@
   `(mapc (lambda (package) ,@body ) ,packageList)) 
 
 (defun install-if-necessary (package)
+  "Installs a package if it is not already"
   (or (package-installed-p package) 
       (package-install package)))
 
@@ -70,12 +71,11 @@
 
 ;;adds the fetched el-get packages to load-path and requires them
 (do-to-package-list el-get-sources
-                         (add-to-list 'load-path (init-git-package-directory package "/home/yourname/.emacs.d/el-get/"))
-                         (require package))                      
+                    (add-to-list 'load-path (init-git-package-directory package "/home/yourname/.emacs.d/el-get/"))
+                    (require package))                      
 
 (el-get 'sync el-get-sources)
 
-;; (require 'kill-ring-ido)
 (global-set-key (kbd "M-y") 'kill-ring-ido)
 (setq kill-ring-ido-shortage-length 24) 
 
