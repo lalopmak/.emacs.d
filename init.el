@@ -1,3 +1,11 @@
+;;; License
+
+;; This software is released under the CC0 1.0 Universal license. You are
+;; free to use, modify, and redistribute it as you please. This software
+;; comes with NO WARRANTIES OR GUARANTEES WHATSOEVER. For details, see
+;; http://creativecommons.org/publicdomain/zero/1.0/
+
+
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
                          ("melpa" . "http://melpa.milkbox.net/packages/")))
