@@ -14,7 +14,7 @@
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous)
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative)
                          (install-if-necessary package)
                          (require package))
 
@@ -145,6 +145,7 @@
 
 ;;line numbers
 (global-linum-mode t)
+(require 'linum-relative) ;;relative line-numbers
 
 (set-scroll-bar-mode 'right)   ; replace 'right with 'left to place it to the left
 
@@ -184,3 +185,4 @@
 
 ;; ;; after mouse selection in X11, you can paste by `yank' in emacs
 ;; (setq x-select-enable-primary t)
+
