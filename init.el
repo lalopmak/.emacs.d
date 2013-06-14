@@ -22,7 +22,7 @@
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative)
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode)
                          (install-if-necessary package)
                          (require package))
 
@@ -153,7 +153,7 @@
 
 ;;line numbers
 (global-linum-mode t)
-(require 'linum-relative) ;;relative line-numbers
+
 
 (set-scroll-bar-mode 'right)   ; replace 'right with 'left to place it to the left
 
@@ -187,10 +187,35 @@
 
 (add-hook 'LaTeX-mode-hook 'flymake-mode)	
 
+
 ;; ;;fix copy paste?
 ;; ;; after copy Ctrl+c in X11 apps, you can paste by `yank' in emacs
 ;; (setq x-select-enable-clipboard t)
 
 ;; ;; after mouse selection in X11, you can paste by `yank' in emacs
 ;; (setq x-select-enable-primary t)
+;; (setq x-select-enable-clipboard t)
+;; (setq interprogram-paste-function 'x-cut-buffer-or-selection-value)
+;; (setq mouse-drag-copy-region nil)  ; stops selection with a mouse being immediately injected to the kill ring
 
+;; ;stops selection/visual mode from auto copying
+;; (setq x-select-enable-primary nil)  
+;; ;  active region sets primary X11 selection
+;; (setq select-active-regions t)
+
+;;;;;;;
+;;Behaviors
+;;;;;;;
+;; (global-hl-line-mode 1) ; turn on highlighting current line
+(delete-selection-mode 1) ; delete seleted text when typing
+;; (transient-mark-mode 1) ; highlight text selectio
+;; (setq show-paren-style 'expression) ; highlight entire bracket expression
+
+;enables copy/pasting to clipboard
+(setq x-select-enable-clipboard t)  
+(setq interprogram-paste-function 'x-cut-buffer-or-selection-value)
+
+; stops selection with a mouse being immediately injected to the kill ring
+(setq mouse-drag-copy-region nil)
+(global-centered-cursor-mode t)
+(put 'downcase-region 'disabled nil)
