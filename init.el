@@ -33,8 +33,10 @@
 ;;the base directory for git packages
 (defvar init-git-directory "~/.emacs.d/git-packages/") 
 
-;;the directory in which this git package would be installed
-(cl-defun init-git-package-directory (package &optional (baseDir init-git-directory)) (file-truename  (concat baseDir (symbol-name package)))) 
+(cl-defun init-git-package-directory (package &optional (baseDir init-git-directory)) 
+  "The directory in which this git package would be installed"
+  (file-truename (concat baseDir 
+                         (symbol-name package)))) 
 
 ;;requires packageName, fetching from git url if necessary
 (defun require-or-git-clone (package url) 
