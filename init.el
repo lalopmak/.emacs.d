@@ -218,23 +218,13 @@
 ;; (setq show-paren-style 'expression) ; highlight entire bracket expression
 (global-centered-cursor-mode t)
 
-;;Copy paste tests
-;; ;;ensures that external pastes are stored to the kill ring
-;; ;(setq save-interprogram-paste-before-kill t)
-
-;; ;;always pastes from clipboard.
-;; (setq interprogram-paste-function (lambda () (shell-command-to-string "xclip -o")))
-(setq select-active-regions nil)
-;; (setq mouse-drag-copy-region nil)  ; stops selection with a mouse being immediately injected to the kill ring (in default mode)
-
-;; ;;TODO: prevent selection from copying to clipboard (perhaps primary instead) in other evil states
-;; (setq select-active-regions nil)  ;;doesn't seem to work??
-;; ;;Possible hint: visual block doesn't copy to clipboard
 
 ;;Sets clipboard to primary by default
-(setq x-select-enable-clipboard nil)
-(setq x-select-enable-primary t)
-(setq mouse-drag-copy-region t)
+;; (setq x-select-enable-clipboard nil)
+;; (setq x-select-enable-primary t)
+
+;; Disables highlight-copying in "insert mode"
+(setq mouse-drag-copy-region nil)
 
 
 ;;doesn't seem to make a difference
@@ -242,3 +232,6 @@
 ;; (global-set-key "\M-w" 'clipboard-kill-ring-save)
 
 (global-set-key "\C-y" 'clipboard-yank)
+
+
+(ad-activate-all) ;activates all advice
