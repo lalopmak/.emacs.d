@@ -22,13 +22,13 @@
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode)
-                         (install-if-necessary package)
-                         (require package))
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode )
+                    (install-if-necessary package)
+                    (require package))
 
 ;;installs the following packages (without loading) if necessary
 (do-to-package-list '(dired+ auctex color-theme)
-                         (install-if-necessary package))
+                    (install-if-necessary package))
 
 ;;the base directory for git packages
 (defvar init-git-directory "~/.emacs.d/git-packages/") 
@@ -75,7 +75,7 @@
 (setq
  el-get-sources
  '(el-get				; el-get is self-hosting
-  kill-ring-ido)) 
+   kill-ring-ido)) 
 
 ;;adds the fetched el-get packages to load-path and requires them
 (do-to-package-list el-get-sources
@@ -128,7 +128,7 @@
   (buffer-file-name (get-buffer-create name)))
 
 (defun active-and-not-visiting-file (name)
- (and (get-buffer name) (not (file-visited-by name)) )) 
+  (and (get-buffer name) (not (file-visited-by name)) )) 
 
 (add-to-list 'ido-ignore-buffers 'active-and-not-visiting-file)
 
@@ -188,39 +188,6 @@
 (add-hook 'LaTeX-mode-hook 'flymake-mode)	
 
 
-;; ;;fix copy paste?
-;; ;; after copy Ctrl+c in X11 apps, you can paste by `yank' in emacs
-;; (setq x-select-enable-clipboard t)
-
-;; ;; after mouse selection in X11, you can paste by `yank' in emacs
-;; (setq x-select-enable-primary t)
-;; (setq x-select-enable-clipboard t)
-;; (setq interprogram-paste-function 'x-cut-buffer-or-selection-value)
-;; (setq mouse-drag-copy-region nil)  ; stops selection with a mouse being immediately injected to the kill ring
-
-;; ;stops selection/visual mode from auto copying
-;; (setq x-select-enable-primary nil)  
-;; ;  active region sets primary X11 selection
-;; (setq select-active-regions t)
-
-;;;;;;;
-;;Behaviors
-;;;;;;;
-;; (global-hl-line-mode 1) ; turn on highlighting current line
-(delete-selection-mode 1) ; delete seleted text when typing
-;; (transient-mark-mode 1) ; highlight text selectio
-;; (setq show-paren-style 'expression) ; highlight entire bracket expression
-
-;enables copy/pasting to clipboard
-(setq x-select-enable-clipboard t)  
-(setq interprogram-paste-function 'x-cut-buffer-or-selection-value)
-
-; stops selection with a mouse being immediately injected to the kill ring
-(setq mouse-drag-copy-region nil)
-(global-centered-cursor-mode t)
-(put 'downcase-region 'disabled nil)
-
-
 ;;;;;;;;;;;;;;;;
 ;;Frame title setter
 ;;;;;;;;;;;;;;;;
@@ -233,8 +200,27 @@
 
 ;;sets frame title: "filename (directory) [emacs-title-format]"
 (setq frame-title-format
-      '("%b " (:eval (if (buffer-file-name)
+      '("%b " (:eval (if (buffer-file-name)  ;adds the (directory)
                          (concat "("
                                  (abbreviate-file-name (file-name-directory buffer-file-name)) 
                                  ")"))) 
         emacs-title-format))
+
+
+;;;;;;;
+;;Behaviors
+;;;;;;;
+;; (global-hl-line-mode 1) ; turn on highlighting current line
+(delete-selection-mode 1) ; delete seleted text when typing
+;; (transient-mark-mode 1) ; highlight text selection
+;; (setq show-paren-style 'expression) ; highlight entire bracket expression
+
+
+;;always pastes from clipboard.
+(setq interprogram-paste-function (lambda () (shell-command-to-string "xclip -o")))
+
+(setq mouse-drag-copy-region nil)  ; stops selection with a mouse being immediately injected to the kill ring (in default mode)
+
+;;TODO: prevent selection from copying to clipboard (perhaps primary instead) in other evil states
+(setq select-active-regions nil)  ;;doesn't seem to work??
+;;Possible hint: visual block doesn't copy to clipboard
