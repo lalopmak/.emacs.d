@@ -219,3 +219,22 @@
 (setq mouse-drag-copy-region nil)
 (global-centered-cursor-mode t)
 (put 'downcase-region 'disabled nil)
+
+
+;;;;;;;;;;;;;;;;
+;;Frame title setter
+;;;;;;;;;;;;;;;;
+
+;;how to insert emacs at the end of frame: pick one
+(defvar emacs-title-format " @ emacs")
+;; (defvar emacs-title-format 
+;;   (concat " @ Emacs "
+;;           emacs-version))
+
+;;sets frame title: "filename (directory) [emacs-title-format]"
+(setq frame-title-format
+      '("%b " (:eval (if (buffer-file-name)
+                         (concat "("
+                                 (abbreviate-file-name (file-name-directory buffer-file-name)) 
+                                 ")"))) 
+        emacs-title-format))
