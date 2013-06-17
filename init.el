@@ -6,6 +6,8 @@
 ;; http://creativecommons.org/publicdomain/zero/1.0/
 
 
+;; (defvar lalopmak-layout-map 'colemak-to-qwerty)
+
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
                          ("melpa" . "http://melpa.milkbox.net/packages/")))
@@ -22,7 +24,7 @@
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode )
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server)
                     (install-if-necessary package)
                     (require package))
 
@@ -83,6 +85,9 @@
 (do-to-package-list el-get-sources
                     (add-to-list 'load-path (init-git-package-directory package "/home/yourname/.emacs.d/el-get/"))
                     (require package))                      
+
+
+(edit-server-start)
 
 (el-get 'sync el-get-sources)
 
@@ -234,4 +239,4 @@
 (global-set-key "\C-y" 'clipboard-yank)
 
 
-(ad-activate-all) ;activates all advice
+;; (ad-activate-all) ;activates all advice
