@@ -5,8 +5,9 @@
 ;; comes with NO WARRANTIES OR GUARANTEES WHATSOEVER. For details, see
 ;; http://creativecommons.org/publicdomain/zero/1.0/
 
-
+;; uncomment if using qwerty
 ;; (defvar lalopmak-layout-map 'colemak-to-qwerty)
+
 
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
@@ -52,7 +53,7 @@
                git nil nil nil "--no-pager" "clone" "-v" url packageDir)))
         (if (zerop status)
             (require package)
-          (error "Couldn't clone %s from the Git repository: %s" package url))))))
+          (error "Couldn't clone %s from %s" package url))))))
 
 ;;evil
 (require-or-git-clone 'evil "git://gitorious.org/evil/evil.git" )
@@ -158,9 +159,6 @@
 ;; I want spaces for indentation
 (setq-default indent-tabs-mode nil)
 
-;;line numbers
-(global-linum-mode t)
-
 
 (set-scroll-bar-mode 'right)   ; replace 'right with 'left to place it to the left
 
@@ -217,11 +215,30 @@
 ;;;;;;;
 ;;Behaviors
 ;;;;;;;
+
+(defmacro init-activate-on-open ()
+  "Commands we want to activate upon opening new file/buffer"
+  `(progn (linum-mode t)
+          (centered-cursor-mode t)))
+
+(defadvice ido-find-file (after init-new-found-file ())
+  "Activates those commands upon opening file"
+  (init-activate-on-open))
+
+(defadvice ido-switch-buffer (after nint-new-buffer ())
+  "Activate those commands upon switching buffer"
+  (init-activate-on-open))
+
+(global-linum-mode t)
+(global-centered-cursor-mode t)
+
+(column-number-mode 1)
+
 ;; (global-hl-line-mode 1) ; turn on highlighting current line
 (delete-selection-mode 1) ; delete seleted text when typing
 ;; (transient-mark-mode 1) ; highlight text selection
 ;; (setq show-paren-style 'expression) ; highlight entire bracket expression
-(global-centered-cursor-mode t)
+
 
 
 ;;Sets clipboard to primary by default
@@ -239,4 +256,4 @@
 (global-set-key "\C-y" 'clipboard-yank)
 
 
-;; (ad-activate-all) ;activates all advice
+ (ad-activate-all) ;activates all advice
