@@ -33,36 +33,77 @@
 (do-to-package-list '(dired+ auctex color-theme)
                     (install-if-necessary package))
 
-;;the base directory for git packages
-(defvar init-git-directory "~/.emacs.d/git-packages/") 
+;;;;;Package retrieval helpers
 
-(cl-defun init-git-package-directory (package &optional (baseDir init-git-directory)) 
-  "The directory in which this git package would be installed"
+;;the base directory for online retrieved packages
+(defvar online-packages-directory "~/.emacs.d/online-packages/") 
+
+(cl-defun init-online-packages-directory (package &optional (baseDir online-packages-directory)) 
+  "The directory in which this online package would be installed"
   (file-truename (concat baseDir 
                          (symbol-name package)))) 
 
-(defun require-or-git-clone (package url) 
-  "requires packageName, fetching from git url if necessary"
-  (let ((packageDir (init-git-package-directory package))) 
-    (add-to-list 'load-path packageDir)
-    (unless (require package nil 'noerror)
-      (let* ((git (or (executable-find "git")
-                      (error "Unable to find `git'")))
-             (status  
-              (call-process
-               git nil nil nil "--no-pager" "clone" "-v" url packageDir)))
-        (if (zerop status)
-            (require package)
-          (error "Couldn't clone %s from %s" package url))))))
+(defun execute-process (processName &rest processArgs)
+  "Executes a process with given args, all strings.  Returns status (check with zerop)"
+  (let ((fetcherProcess (or (executable-find processName)
+                            (error (concat "Unable to find " processName)))))
+    (apply 'call-process
+           fetcherProcess 
+           nil
+           nil
+           nil
+           processArgs)))
+
+(defun fetch-online-then-require (package url fetcher &rest processArgs)
+  "Fetches something online using the fetcher process with processArgs, then requires the associated package"
+  (if (zerop (apply 'execute-process fetcher processArgs))
+        (require package)
+      (error "Couldn't fetch %s from %s" package url)))
+
+(defun require-or-fetch-online (package packageDir url fetcher &rest processArgs)
+  "Loads and requires package, fetching with fetcher process if necessary"
+  (add-to-list 'load-path packageDir)
+  (unless (require package nil 'noerror)
+    (apply 'fetch-online-then-require package url fetcher processArgs)))
+ 
+(defun require-and-fetch-online (package packageDir url fetcher &rest processArgs)
+  "Fetches (unless already fetched), loads, and requires package."
+  (add-to-list 'load-path packageDir)
+  (if (file-exists-p packageDir)
+      (require package)
+    (apply 'fetch-online-then-require package url fetcher processArgs)))
+ 
+(cl-defun require-or-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
+  "Loads and requires packageName, cloning from git url if necessary"
+  (require-or-fetch-online package packageDir url "git" "--no-pager" "clone" "-v" url packageDir))
+
+(cl-defun require-and-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
+  "Loads and requires packageName, cloning from git url if not already fetched"
+  (require-and-fetch-online package packageDir url "git" "--no-pager" "clone" "-v" url packageDir))
+
+;;;;;;;Packages retrieved via git
 
 ;;evil
-(require-or-git-clone 'evil "git://gitorious.org/evil/evil.git" )
-(require-or-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
+(require-and-git-clone 'evil "git://gitorious.org/evil/evil.git" )
+(require-and-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
 
 ;;tango color theme
 (require-or-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
-(add-to-list 'custom-theme-load-path (init-git-package-directory 'color-theme-tangotango))
+(add-to-list 'custom-theme-load-path (init-online-packages-directory 'color-theme-tangotango))
 (load-theme 'tangotango t)
+
+
+(cl-defun require-or-wget (package url &optional (packageDir (init-online-packages-directory package))) 
+  "Loads and requires packageName, fetching with wget if necessary"
+  (require-or-fetch-online package packageDir url "wget" url "-P" packageDir))
+
+(cl-defun require-and-wget (package url &optional (packageDir (init-online-packages-directory package))) 
+  "Loads and requires packageName, fetching with wget unless already fetched"
+  (require-and-fetch-online package packageDir url "wget" url "-P" packageDir))
+
+
+;;;;;;  Packages retrieved via wget
+(require-and-wget 'prolog "http://bruda.ca/_media/emacs/prolog.el")
 
 
 
@@ -84,7 +125,7 @@
 
 ;;adds the fetched el-get packages to load-path and requires them
 (do-to-package-list el-get-sources
-                    (add-to-list 'load-path (init-git-package-directory package "/home/yourname/.emacs.d/el-get/"))
+                    (add-to-list 'load-path (init-online-packages-directory package "/home/yourname/.emacs.d/el-get/"))
                     (require package))                      
 
 
@@ -221,6 +262,11 @@
   `(progn (linum-mode t)
           (centered-cursor-mode t)))
 
+;;Global mode for those same commands (because not all openings are covered by our advice)
+(global-linum-mode t)
+(global-centered-cursor-mode t)
+
+
 (defadvice ido-find-file (after init-new-found-file ())
   "Activates those commands upon opening file"
   (init-activate-on-open))
@@ -229,10 +275,7 @@
   "Activate those commands upon switching buffer"
   (init-activate-on-open))
 
-(global-linum-mode t)
-(global-centered-cursor-mode t)
-
-(column-number-mode 1)
+(column-number-mode 1)    ;  displays line and column number in status bar
 
 ;; (global-hl-line-mode 1) ; turn on highlighting current line
 (delete-selection-mode 1) ; delete seleted text when typing
