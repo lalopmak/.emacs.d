@@ -45,10 +45,10 @@
 
 (defun execute-process (processName &rest processArgs)
   "Executes a process with given args, all strings.  Returns status (check with zerop)"
-  (let ((fetcherProcess (or (executable-find processName)
+  (let ((process (or (executable-find processName)
                             (error (concat "Unable to find " processName)))))
     (apply 'call-process
-           fetcherProcess 
+           process 
            nil
            nil
            nil
@@ -127,9 +127,6 @@
 (do-to-package-list el-get-sources
                     (add-to-list 'load-path (init-online-packages-directory package "/home/yourname/.emacs.d/el-get/"))
                     (require package))                      
-
-
-(edit-server-start)
 
 (el-get 'sync el-get-sources)
 
@@ -252,6 +249,28 @@
                                  ")"))) 
         emacs-title-format))
 
+;;;;;;;
+;;Spell check
+;;;;;;
+
+(require-or-wget 'speck "http://www.emacswiki.org/emacs/download/speck.el")
+
+;;;;;;;
+;;Edit-Server (for text areas in browsers)
+;;;;;;;
+
+(edit-server-start)
+
+;;Adds spell check to edit-server
+(add-hook 'edit-server-edit-mode-hook
+  (lambda()
+    (speck-mode 1)))
+
+;;Sets size
+(add-hook 'edit-server-edit-mode-hook
+  (lambda()
+    (if window-system
+        (set-frame-size (selected-frame) 80 11))))
 
 ;;;;;;;
 ;;Behaviors
@@ -300,3 +319,4 @@
 
 
  (ad-activate-all) ;activates all advice
+(put 'downcase-region 'disabled nil)
