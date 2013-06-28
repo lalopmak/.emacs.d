@@ -285,6 +285,10 @@
 (global-linum-mode t)
 (global-centered-cursor-mode t)
 
+;;;;Enable commands
+
+;;M-x downcase-region
+(put 'downcase-region 'disabled nil)
 
 (defadvice ido-find-file (after init-new-found-file ())
   "Activates those commands upon opening file"
@@ -318,5 +322,5 @@
 (global-set-key "\C-y" 'clipboard-yank)
 
 
- (ad-activate-all) ;activates all advice
-(put 'downcase-region 'disabled nil)
+(ad-activate-all) ;activates all advice
+
