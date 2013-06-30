@@ -1,9 +1,9 @@
 ;;; License
 
-;; This software is released under the CC0 1.0 Universal license. You are
-;; free to use, modify, and redistribute it as you please. This software
-;; comes with NO WARRANTIES OR GUARANTEES WHATSOEVER. For details, see
-;; http://creativecommons.org/publicdomain/zero/1.0/
+;; This software is licensed under the CC0 1.0 Public Domain Declaration, as
+;; released by Creative Commons <http://creativecommons.org/publicdomain/zero/1.0/>.
+;; This software comes with NO WARRANTIES OR GUARANTEES WHATSOEVER.
+
 
 ;; uncomment if using qwerty
 ;; (defvar lalopmak-layout-map 'colemak-to-qwerty)
@@ -151,8 +151,8 @@
       ido-case-fold  t                 ; be case-insensitive
       ido-enable-last-directory-history t ; remember last used dirs
       ido-record-commands t
-      ido-max-work-directory-list 30   ; should be enough
-      ido-max-work-file-list      50   ; remember many
+      ido-max-work-directory-list 60   ; should be enough
+      ido-max-work-file-list      100   ; remember many
       ido-use-virtual-buffers t 
       )
 
@@ -261,16 +261,13 @@
 
 (edit-server-start)
 
-;;Adds spell check to edit-server
 (add-hook 'edit-server-edit-mode-hook
   (lambda()
-    (speck-mode 1)))
-
-;;Sets size
-(add-hook 'edit-server-edit-mode-hook
-  (lambda()
+    ;;Adds spell check to edit-server
+    (speck-mode 1)
+    ;;Sets size
     (if window-system
-        (set-frame-size (selected-frame) 80 11))))
+        (set-frame-size (selected-frame) 80 12))))
 
 ;;;;;;;
 ;;Behaviors
