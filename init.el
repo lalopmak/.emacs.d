@@ -54,9 +54,14 @@
            nil
            processArgs)))
 
+
+(defun fetch-online (fetcher &rest processArgs)
+  "Loads and requires package, fetching with fetcher process if necessary"
+  (apply 'execute-process fetcher processArgs))
+
 (defun fetch-online-then-require (package url fetcher &rest processArgs)
   "Fetches something online using the fetcher process with processArgs, then requires the associated package"
-  (if (zerop (apply 'execute-process fetcher processArgs))
+  (if (zerop (fetch-online fetcher processArgs))
         (require package)
       (error "Couldn't fetch %s from %s" package url)))
 
@@ -72,6 +77,7 @@
   (if (file-exists-p packageDir)
       (require package)
     (apply 'fetch-online-then-require package url fetcher processArgs)))
+
  
 (cl-defun require-or-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
   "Loads and requires packageName, cloning from git url if necessary"
@@ -80,6 +86,11 @@
 (cl-defun require-and-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
   "Loads and requires packageName, cloning from git url if not already fetched"
   (require-and-fetch-online package packageDir url "git" "--no-pager" "clone" "-v" url packageDir))
+
+
+(defun git-clone (url dir) 
+  "Loads and requires packageName, cloning from git url if not already fetched"
+  (fetch-online "git" "--no-pager" "clone" "-v" url dir))
 
 ;;;;;;;Packages retrieved via git
 
@@ -91,6 +102,18 @@
 (require-or-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
 (add-to-list 'custom-theme-load-path (init-online-packages-directory 'color-theme-tangotango))
 (load-theme 'tangotango t)
+
+
+;;Snippets collection
+(defvar init-snippets-dir "~/.emacs.d/snippets/")
+
+(unless (file-exists-p init-snippets-dir) 
+  ;;Clones the collection
+  (git-clone "https://github.com/lalopmak/snippets" init-snippets-dir)
+
+  ;;Copies them over to yasnippet directory
+  (apply 'execute-process "ruby" (concat (file-name-as-directory init-snippets-dir) "update_snippets.rb")))
+
 
 
 (cl-defun require-or-wget (package url &optional (packageDir (init-online-packages-directory package))) 
@@ -139,7 +162,7 @@
 
 
 (yas--initialize)
-
+(yas-global-mode 1)
 
 ;; (iswitchb-mode t)
 (require 'ido)
@@ -321,3 +344,26 @@
 
 (ad-activate-all) ;activates all advice
 
+;; Completing point by some yasnippet key
+(defun yas-ido-expand ()
+  "Lets you select (and expand) a yasnippet key"
+  (interactive)
+    (let ((original-point (point)))
+      (while (and
+              (not (= (point) (point-min) ))
+              (not
+               (string-match "[[:space:]\n]" (char-to-string (char-before)))))
+        (backward-word 1))
+    (let* ((init-word (point))
+           (word (buffer-substring init-word original-point))
+           (list (yas-active-keys)))
+      (goto-char original-point)
+      (let ((key (remove-if-not
+                  (lambda (s) (string-match (concat "^" word) s)) list)))
+        (if (= (length key) 1)
+            (setq key (pop key))
+          (setq key (ido-completing-read "key: " list nil nil word)))
+        (delete-char (- init-word original-point))
+        (insert key)
+        (yas-expand)))))
+ (define-key yas-minor-mode-map (kbd "<C-tab>")     'yas-ido-expand)
