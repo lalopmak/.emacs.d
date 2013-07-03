@@ -148,7 +148,7 @@
 
 ;;adds the fetched el-get packages to load-path and requires them
 (do-to-package-list el-get-sources
-                    (add-to-list 'load-path (init-online-packages-directory package "/home/yourname/.emacs.d/el-get/"))
+                    (add-to-list 'load-path (init-online-packages-directory package "~/.emacs.d/el-get/"))
                     (require package))                      
 
 (el-get 'sync el-get-sources)
@@ -247,13 +247,33 @@
 
 (require 'flymake)
 
+(defun concat-with-space (head &rest tail)
+  (if tail
+      (concat head 
+              " " 
+              (apply 'concat-with-space tail))
+    head))
+
+(defvar latex-base-compile-command (concat-with-space "lualatex -file-line-error" "-draftmode" "-interaction=nonstopmode"))
+
+(defun latex-compile-command (file-name)
+  (concat-with-space latex-base-compile-command file-name))
+
 (defun flymake-get-tex-args (file-name)
   (list "lualatex"
         (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
 
 (add-hook 'LaTeX-mode-hook 'flymake-mode)	
 
+(cl-defun latex-compile (&optional (file-name buffer-file-name))
+  (interactive)
+  (compile (latex-compile-command file-name)))
 
+(require 'reftex)
+(setq reftex-plug-into-AUCTeX t)
+
+
+(evil-ex-define-cmd "compile" 'latex-compile)
 ;;;;;;;;;;;;;;;;
 ;;Frame title setter
 ;;;;;;;;;;;;;;;;
@@ -367,3 +387,4 @@
         (insert key)
         (yas-expand)))))
  (define-key yas-minor-mode-map (kbd "<C-tab>")     'yas-ido-expand)
+
