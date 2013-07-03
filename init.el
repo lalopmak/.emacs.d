@@ -254,7 +254,7 @@
               (apply 'concat-with-space tail))
     head))
 
-(defvar latex-base-compile-command (concat-with-space "lualatex -file-line-error" "-draftmode" "-interaction=nonstopmode"))
+(defvar latex-base-compile-command (concat-with-space "lualatex -interaction=nonstopmode"))
 
 (defun latex-compile-command (file-name)
   (concat-with-space latex-base-compile-command file-name))
@@ -273,7 +273,7 @@
 (setq reftex-plug-into-AUCTeX t)
 
 
-(evil-ex-define-cmd "compile" 'latex-compile)
+(evil-ex-define-cmd "latex" 'latex-compile)
 ;;;;;;;;;;;;;;;;
 ;;Frame title setter
 ;;;;;;;;;;;;;;;;
