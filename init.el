@@ -61,7 +61,7 @@
 
 (defun fetch-online-then-require (package url fetcher &rest processArgs)
   "Fetches something online using the fetcher process with processArgs, then requires the associated package"
-  (if (zerop (fetch-online fetcher processArgs))
+  (if (zerop (apply 'fetch-online fetcher processArgs))
         (require package)
       (error "Couldn't fetch %s from %s" package url)))
 
@@ -81,16 +81,16 @@
  
 (cl-defun require-or-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
   "Loads and requires packageName, cloning from git url if necessary"
-  (require-or-fetch-online package packageDir url "git" "--no-pager" "clone" "-v" url packageDir))
+  (require-or-fetch-online package packageDir url "git" "--no-pager" "clone" "-v" url (file-truename packageDir)))
 
 (cl-defun require-and-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
   "Loads and requires packageName, cloning from git url if not already fetched"
-  (require-and-fetch-online package packageDir url "git" "--no-pager" "clone" "-v" url packageDir))
+  (require-and-fetch-online package packageDir url "git" "--no-pager" "clone" "-v" url (file-truename packageDir)))
 
 
 (defun git-clone (url dir) 
   "Loads and requires packageName, cloning from git url if not already fetched"
-  (fetch-online "git" "--no-pager" "clone" "-v" url dir))
+  (fetch-online "git" "--no-pager" "clone" "-v" url (file-truename dir)))
 
 ;;;;;;;Packages retrieved via git
 
@@ -112,7 +112,7 @@
   (git-clone "https://github.com/lalopmak/snippets" init-snippets-dir)
 
   ;;Copies them over to yasnippet directory
-  (apply 'execute-process "ruby" (concat (file-name-as-directory init-snippets-dir) "update_snippets.rb")))
+  (execute-process "ruby" (concat (file-name-as-directory init-snippets-dir) "update_snippets.rb")))
 
 
 
