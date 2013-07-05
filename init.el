@@ -155,7 +155,7 @@
 
 (el-get 'sync el-get-sources)
 
-(global-set-key (kbd "C-M-y") 'kill-ring-ido)
+(global-set-key (kbd "M-y") 'kill-ring-ido)
 (setq kill-ring-ido-shortage-length 24) 
 
 (require 'recentf)
