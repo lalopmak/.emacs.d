@@ -78,19 +78,21 @@
       (require package)
     (apply 'fetch-online-then-require package url fetcher processArgs)))
 
- 
+(defun git-args (url dir)
+  "Returns the list of args to a git call"
+  (list "--no-pager" "clone" "-v" url (file-truename dir)))
+
 (cl-defun require-or-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
   "Loads and requires packageName, cloning from git url if necessary"
-  (require-or-fetch-online package packageDir url "git" "--no-pager" "clone" "-v" url (file-truename packageDir)))
+  (apply 'require-or-fetch-online package packageDir url "git" (git-args url packageDir)))
 
 (cl-defun require-and-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
   "Loads and requires packageName, cloning from git url if not already fetched"
-  (require-and-fetch-online package packageDir url "git" "--no-pager" "clone" "-v" url (file-truename packageDir)))
-
+  (apply 'require-and-fetch-online package packageDir url "git" (git-args url packageDir)))
 
 (defun git-clone (url dir) 
   "Loads and requires packageName, cloning from git url if not already fetched"
-  (fetch-online "git" "--no-pager" "clone" "-v" url (file-truename dir)))
+  (apply 'fetch-online "git" (git-args url dir)))
 
 ;;;;;;;Packages retrieved via git
 
