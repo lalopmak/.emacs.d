@@ -155,7 +155,7 @@
 
 (el-get 'sync el-get-sources)
 
-(global-set-key (kbd "M-y") 'kill-ring-ido)
+(global-set-key (kbd "C-M-y") 'kill-ring-ido)
 (setq kill-ring-ido-shortage-length 24) 
 
 (require 'recentf)
@@ -327,6 +327,8 @@
 (global-linum-mode t)
 (global-centered-cursor-mode t)
 
+;;soft line wrap by word at boundary
+(global-visual-line-mode 1)
 ;;;;Enable commands
 
 ;;M-x downcase-region
