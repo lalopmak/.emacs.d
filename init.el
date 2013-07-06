@@ -25,7 +25,7 @@
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server)
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode)
                     (install-if-necessary package)
                     (require package))
 
@@ -294,6 +294,15 @@
                                  ")"))) 
         emacs-title-format))
 
+;;;;;;;
+;;Ace jump
+;;;;;;;
+
+;; (define-key evil-normal-state-map (kbd "SPC") 'ace-jump-mode)
+(setq ace-jump-mode-move-keys
+      (list    ?n ?e ?i ?o ?h ?u ?y ?k ?a ?t ?d ?w ?f ?p ?l ?r ?s ?v  
+            ;;?N ?E ?I ?O ?K ?U ?Y ?L
+            ))
 ;;;;;;;
 ;;Spell check
 ;;;;;;
