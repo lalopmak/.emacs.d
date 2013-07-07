@@ -30,7 +30,7 @@
                     (require package))
 
 ;;installs the following packages (without loading) if necessary
-(do-to-package-list '(dired+ auctex color-theme)
+(do-to-package-list '(dired+ auctex color-theme undo-tree)
                     (install-if-necessary package))
 
 ;;;;;Package retrieval helpers
@@ -40,7 +40,7 @@
 
 (cl-defun init-online-packages-directory (package &optional (baseDir online-packages-directory)) 
   "The directory in which this online package would be installed"
-  (file-truename (concat baseDir 
+  (file-truename (concat (file-name-as-directory baseDir) 
                          (symbol-name package)))) 
 
 (defun execute-process (processName &rest processArgs)
@@ -98,7 +98,22 @@
 
 ;;evil
 (require-and-git-clone 'evil "git://gitorious.org/evil/evil.git" )
+
+;;if local copy of undo-tree is required
+;; (require-and-git-clone 'undo-tree "http://www.dr-qubit.org/git/undo-tree.git")
+
+;; ;;symlinks undo-tree.el into evil if necessary
+;; (let* ((undo-tree-concater (lambda (package) (concat (file-name-as-directory (init-online-packages-directory package))
+;;                                                      "undo-tree.el")))
+;;        (evil-undo-tree-file (funcall undo-tree-concater 'evil))
+;;        (undo-tree-file (funcall undo-tree-concater 'undo-tree)))
+;;   (unless (file-exists-p evil-undo-tree-file)
+;;     (make-symbolic-link undo-tree-file evil-undo-tree-file)))
+ 
+
 (require-and-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
+
+
 
 ;;tango color theme
 (require-or-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
