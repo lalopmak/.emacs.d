@@ -2,7 +2,17 @@
 
 ;; This software is licensed under the CC0 1.0 Public Domain Declaration, as
 ;; released by Creative Commons <http://creativecommons.org/publicdomain/zero/1.0/>.
-;; This software comes with NO WARRANTIES OR GUARANTEES WHATSOEVER.
+
+;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+;; ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+;; WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+;; ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+;; ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+;; (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+;; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+;; ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+;; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ;; uncomment if using qwerty
@@ -345,10 +355,10 @@
 ;;Behaviors
 ;;;;;;;
 
-(defvar init-centered-cursor nil, "Wheter or not we set to default centered cursor")
+(defvar init-centered-cursor nil, "Wheter or not we set centered cursor by default")
 (defvar init-relative-mode nil, "Whether or not we start out with relative line numbers")
 
-;;linum-relative starts on by default, if false toggle off
+;;linum-relative starts on by default, toggle off if necessary
 (unless init-relative-mode (linum-relative-toggle))
 
 (defmacro init-activate-on-open ()
