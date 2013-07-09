@@ -8,6 +8,8 @@
 ;; uncomment if using qwerty
 ;; (defvar lalopmak-layout-map 'colemak-to-qwerty)
 
+;;This script calls programs: git, ruby, wget
+
 
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
@@ -25,7 +27,7 @@
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode)
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode )
                     (install-if-necessary package)
                     (require package))
 
@@ -284,6 +286,7 @@
 
 (cl-defun latex-compile (&optional (file-name buffer-file-name))
   (interactive)
+  (save-buffer)
   (compile (latex-compile-command file-name)))
 
 (require 'reftex)
@@ -342,14 +345,20 @@
 ;;Behaviors
 ;;;;;;;
 
+(defvar init-centered-cursor nil, "Wheter or not we set to default centered cursor")
+(defvar init-relative-mode t, "Whether or not we start out with relative line numbers")
+
+(if init-relative-mode (linum-relative-toggle))
+
+
 (defmacro init-activate-on-open ()
   "Commands we want to activate upon opening new file/buffer"
   `(progn (linum-mode t)
-          (centered-cursor-mode t)))
+          (if init-centered-cursor (centered-cursor-mode t))))
 
 ;;Global mode for those same commands (because not all openings are covered by our advice)
 (global-linum-mode t)
-(global-centered-cursor-mode t)
+(if init-centered-cursor (global-centered-cursor-mode t))
 
 ;;soft line wrap by word at boundary
 (global-visual-line-mode 1)
