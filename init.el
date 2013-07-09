@@ -346,10 +346,10 @@
 ;;;;;;;
 
 (defvar init-centered-cursor nil, "Wheter or not we set to default centered cursor")
-(defvar init-relative-mode t, "Whether or not we start out with relative line numbers")
+(defvar init-relative-mode nil, "Whether or not we start out with relative line numbers")
 
-(if init-relative-mode (linum-relative-toggle))
-
+;;linum-relative starts on by default, if false toggle off
+(unless init-relative-mode (linum-relative-toggle))
 
 (defmacro init-activate-on-open ()
   "Commands we want to activate upon opening new file/buffer"
