@@ -292,8 +292,11 @@
   "Gets wordcount for latex file"
   (interactive)
   (save-buffer)
-  (shell-command (concat "texcount "
-                         (buffer-file-name))))
+  (shell-command (concat "texcount \""
+                         (buffer-file-name)
+                         "\"")))
+
+(evil-ex-define-cmd "wordcount" 'latex-word-count)
 
 (defun flymake-get-tex-args (file-name)
   (list "lualatex"
