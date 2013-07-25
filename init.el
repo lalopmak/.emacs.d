@@ -21,9 +21,10 @@
 ;;This script calls programs: git, ruby, wget
 
 
-(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+(setq package-archives '(("melpa" . "http://melpa.milkbox.net/packages/")
+                         ("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")))
+                         ))
 
 (package-initialize)
 
@@ -37,13 +38,43 @@
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode )
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode 
+;;for clojure 
+ auto-complete 
+ paredit popup  rainbow-delimiters)
                     (install-if-necessary package)
                     (require package))
 
 ;;installs the following packages (without loading) if necessary
-(do-to-package-list '(dired+ auctex color-theme undo-tree)
+(do-to-package-list '(dired+ auctex color-theme undo-tree  clojure-mode nrepl ac-nrepl 
+)
                     (install-if-necessary package))
+
+
+;; rainbow delimiters
+(global-rainbow-delimiters-mode)
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(completions-common-part ((t (:inherit default :foreground "red"))))
+ '(diredp-compressed-file-suffix ((t (:foreground "#7b68ee"))))
+ '(diredp-ignored-file-name ((t (:foreground "#aaaaaa"))))
+
+ '(rainbow-delimiters-depth-2-face ((t (:foreground "#8b7500"))))
+ '(rainbow-delimiters-depth-3-face ((t (:foreground "#408000"))))
+ '(rainbow-delimiters-depth-4-face ((t (:foreground "#003db4"))))  ;;bad blue
+ '(rainbow-delimiters-depth-5-face ((t (:foreground "#819a00"))))
+ '(rainbow-delimiters-depth-6-face ((t (:foreground "#5393b3"))))
+ '(rainbow-delimiters-depth-7-face ((t (:foreground "#e69500"))))
+ '(rainbow-delimiters-depth-8-face ((t (:foreground "#009a63"))))
+ '(rainbow-delimiters-depth-9-face ((t (:foreground ;;"#9110be"
+"purple"))))
+ '(rainbow-delimiters-depth-1-face ((t (:foreground "#556677"))))
+ '(rainbow-delimiters-unmatched-face ((t (:foreground "red"))))
+
+ '(show-paren-match ((((class color) (background dark)) (:background "azure2")))))
 
 ;;;;;Package retrieval helpers
 
@@ -132,6 +163,7 @@
 (add-to-list 'custom-theme-load-path (init-online-packages-directory 'color-theme-tangotango))
 (load-theme 'tangotango t)
 
+(setq-default frame-background-mode 'dark)
 
 ;;Snippets collection
 (defvar init-snippets-dir "~/.emacs.d/snippets/")
