@@ -76,6 +76,7 @@
 
  '(show-paren-match ((((class color) (background dark)) (:background "azure2")))))
 
+
 ;;;;;Package retrieval helpers
 
 ;;the base directory for online retrieved packages
@@ -192,6 +193,9 @@
 
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+
+
+
 
 (unless (require 'el-get nil 'noerror)
   (with-current-buffer
@@ -423,7 +427,7 @@
   "Activates those commands upon opening file"
   (init-activate-on-open))
 
-(defadvice ido-switch-buffer (after nint-new-buffer ())
+(defadvice ido-switch-buffer (after init-new-buffer ())
   "Activate those commands upon switching buffer"
   (init-activate-on-open))
 
@@ -435,21 +439,19 @@
 ;; (setq show-paren-style 'expression) ; highlight entire bracket expression
 
 
-
-;;Sets clipboard to primary by default
-;; (setq x-select-enable-clipboard nil)
-;; (setq x-select-enable-primary t)
-
 ;; Disables highlight-copying in "insert mode"
 (setq mouse-drag-copy-region nil)
 
+;; (setq interprogram-paste-function 'x-cut-buffer-or-selection-value)
 
 ;;doesn't seem to make a difference
-;; (global-set-key "\C-w" 'clipboard-kill-region)
+;(global-set-key "\C-w" 'clipboard-kill-region)
 ;; (global-set-key "\M-w" 'clipboard-kill-ring-save)
 
 (global-set-key "\C-y" 'clipboard-yank)
 
+;;Makes sure the top of the clipboard is saved onto our kill ring beforehand
+(setq save-interprogram-paste-before-kill t)
 
 (ad-activate-all) ;activates all advice
 
@@ -478,3 +480,8 @@
  (define-key yas-minor-mode-map (kbd "<C-tab>")     'yas-ido-expand)
 
 (put 'upcase-region 'disabled nil)
+
+
+
+(add-to-list 'load-path "~/.emacs.d/online-packages/lisptree")
+(require 'lisptree)
