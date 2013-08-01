@@ -451,6 +451,7 @@
 (global-set-key "\C-y" 'clipboard-yank)
 
 ;;Makes sure the top of the clipboard is saved onto our kill ring beforehand
+;;avoiding issue where it's never used due to an intermediate kill
 (setq save-interprogram-paste-before-kill t)
 
 (ad-activate-all) ;activates all advice
