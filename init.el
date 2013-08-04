@@ -480,9 +480,10 @@
         (yas-expand)))))
  (define-key yas-minor-mode-map (kbd "<C-tab>")     'yas-ido-expand)
 
+;;Use yasnippet ido menu instead of inefficient prompt menus
+(setq yas-prompt-functions '(yas-ido-prompt))
+
 (put 'upcase-region 'disabled nil)
-
-
 
 (add-to-list 'load-path "~/.emacs.d/online-packages/lisptree")
 (require 'lisptree)
