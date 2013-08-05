@@ -114,6 +114,12 @@
   (add-to-list 'load-path packageDir)
   (unless (require package nil 'noerror)
     (apply 'fetch-online-then-require package url fetcher processArgs)))
+
+(defun check-dir-or-fetch-online (packageDir fetcher &rest processArgs)
+  "If packageDir doesn't exist, fetch from online."
+  (add-to-list 'load-path packageDir)
+  (unless (file-exists-p packageDir)
+    (apply 'fetch-online fetcher processArgs)))
  
 (defun require-and-fetch-online (package packageDir url fetcher &rest processArgs)
   "Fetches (unless already fetched), loads, and requires package."
@@ -134,6 +140,10 @@
   "Loads and requires packageName, cloning from git url if not already fetched"
   (apply 'require-and-fetch-online package packageDir url "git" (git-args url packageDir)))
 
+(cl-defun check-dir-or-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
+  "If package not in packageDir, clone from git url."
+  (apply 'check-dir-or-fetch-online packageDir "git" (git-args url packageDir)))
+
 (defun git-clone (url dir) 
   "Loads and requires packageName, cloning from git url if not already fetched"
   (apply 'fetch-online "git" (git-args url dir)))
@@ -142,6 +152,10 @@
 
 ;;evil
 (require-and-git-clone 'evil "git://gitorious.org/evil/evil.git" )
+
+(require-and-git-clone 'surround "https://github.com/timcharper/evil-surround" )
+
+(global-surround-mode 1)
 
 ;;if local copy of undo-tree is required
 ;; (require-and-git-clone 'undo-tree "http://www.dr-qubit.org/git/undo-tree.git")
@@ -155,9 +169,9 @@
 ;;     (make-symbolic-link undo-tree-file evil-undo-tree-file)))
  
 
-(require-and-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
-
-
+(check-dir-or-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
+;(require 'lalopmak-evil)
+(require 'lalopmak-evil-minimalistic)
 
 ;;tango color theme
 (require-or-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
