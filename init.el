@@ -20,7 +20,6 @@
 
 ;;This script calls programs: git, ruby, wget
 
-
 (setq package-archives '(("melpa" . "http://melpa.milkbox.net/packages/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
@@ -155,6 +154,7 @@
 
 (require-and-git-clone 'surround "https://github.com/timcharper/evil-surround" )
 
+
 (global-surround-mode 1)
 
 ;;if local copy of undo-tree is required
@@ -170,8 +170,11 @@
  
 
 (check-dir-or-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
-;(require 'lalopmak-evil)
-(require 'lalopmak-evil-minimalistic)
+(require 'lalopmak-evil)
+;; (require 'lalopmak-evil-mnemonic)
+
+(evil-mode 1)
+
 
 ;;tango color theme
 (require-or-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
@@ -309,7 +312,6 @@
  ;; If there is more than one, they won't work right.
  '(inhibit-startup-screen t))
 
-(evil-mode 1)
 
 (show-paren-mode 1)
 
@@ -428,10 +430,17 @@
 
 ;;Global mode for those same commands (because not all openings are covered by our advice)
 (global-linum-mode t)
+
+
+(require-and-git-clone 'linum-fixes "https://github.com/lalopmak/linum-fixes")
+
+
+
 (if init-centered-cursor (global-centered-cursor-mode t))
 
 ;;soft line wrap by word at boundary
 (global-visual-line-mode 1)
+
 ;;;;Enable commands
 
 ;;M-x downcase-region
