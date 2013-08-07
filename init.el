@@ -108,20 +108,20 @@
         (require package)
       (error "Couldn't fetch %s from %s" package url)))
 
-(defun require-or-fetch-online (package packageDir url fetcher &rest processArgs)
-  "Loads and requires package, fetching with fetcher process if necessary"
+(defun require-else-fetch (package packageDir url fetcher &rest processArgs)
+  "Loads and requires package (possibly not online version), If package load fails, fetch online version."
   (add-to-list 'load-path packageDir)
   (unless (require package nil 'noerror)
     (apply 'fetch-online-then-require package url fetcher processArgs)))
 
-(defun check-dir-or-fetch-online (packageDir fetcher &rest processArgs)
+(defun unless-dir-exists-fetch (packageDir fetcher &rest processArgs)
   "If packageDir doesn't exist, fetch from online."
   (add-to-list 'load-path packageDir)
   (unless (file-exists-p packageDir)
     (apply 'fetch-online fetcher processArgs)))
  
-(defun require-and-fetch-online (package packageDir url fetcher &rest processArgs)
-  "Fetches (unless already fetched), loads, and requires package."
+(defun require-online-package-else-fetch (package packageDir url fetcher &rest processArgs)
+  "Fetches online version of package (unless already fetched), then loads and requires it."
   (add-to-list 'load-path packageDir)
   (if (file-exists-p packageDir)
       (require package)
@@ -131,17 +131,17 @@
   "Returns the list of args to a git call"
   (list "--no-pager" "clone" "-v" url (file-truename dir)))
 
-(cl-defun require-or-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
-  "Loads and requires packageName, cloning from git url if necessary"
-  (apply 'require-or-fetch-online package packageDir url "git" (git-args url packageDir)))
+(cl-defun require-else-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
+  "Loads and requires package (possibly not online version), If package load fails, git clone online version."
+  (apply 'require-else-fetch package packageDir url "git" (git-args url packageDir)))
 
-(cl-defun require-and-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
-  "Loads and requires packageName, cloning from git url if not already fetched"
-  (apply 'require-and-fetch-online package packageDir url "git" (git-args url packageDir)))
+(cl-defun require-online-package-else-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
+  "Fetches online version of package (unless already fetched), then loads and requires it."
+  (apply 'require-online-package-else-fetch package packageDir url "git" (git-args url packageDir)))
 
-(cl-defun check-dir-or-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
-  "If package not in packageDir, clone from git url."
-  (apply 'check-dir-or-fetch-online packageDir "git" (git-args url packageDir)))
+(cl-defun unless-dir-exists-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
+  "If packageDir doesn't exist, clone from git url."
+  (apply 'unless-dir-exists-fetch packageDir "git" (git-args url packageDir)))
 
 (defun git-clone (url dir) 
   "Loads and requires packageName, cloning from git url if not already fetched"
@@ -150,15 +150,15 @@
 ;;;;;;;Packages retrieved via git
 
 ;;evil
-(require-and-git-clone 'evil "git://gitorious.org/evil/evil.git" )
+(require-online-package-else-git-clone 'evil "git://gitorious.org/evil/evil.git" )
 
-(require-and-git-clone 'surround "https://github.com/timcharper/evil-surround" )
+(require-online-package-else-git-clone 'surround "https://github.com/timcharper/evil-surround" )
 
 
 (global-surround-mode 1)
 
 ;;if local copy of undo-tree is required
-;; (require-and-git-clone 'undo-tree "http://www.dr-qubit.org/git/undo-tree.git")
+;; (require-online-package-else-git-clone 'undo-tree "http://www.dr-qubit.org/git/undo-tree.git")
 
 ;; ;;symlinks undo-tree.el into evil if necessary
 ;; (let* ((undo-tree-concater (lambda (package) (concat (file-name-as-directory (init-online-packages-directory package))
@@ -169,7 +169,7 @@
 ;;     (make-symbolic-link undo-tree-file evil-undo-tree-file)))
  
 
-(check-dir-or-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
+(unless-dir-exists-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
 (require 'lalopmak-evil)
 ;; (require 'lalopmak-evil-mnemonic)
 
@@ -177,7 +177,7 @@
 
 
 ;;tango color theme
-(require-or-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
+(require-else-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
 (add-to-list 'custom-theme-load-path (init-online-packages-directory 'color-theme-tangotango))
 (load-theme 'tangotango t)
 
@@ -195,17 +195,17 @@
 
 
 
-(cl-defun require-or-wget (package url &optional (packageDir (init-online-packages-directory package))) 
-  "Loads and requires packageName, fetching with wget if necessary"
-  (require-or-fetch-online package packageDir url "wget" url "-P" packageDir))
+(cl-defun require-else-wget (package url &optional (packageDir (init-online-packages-directory package))) 
+  "Loads and requires package (possibly not online version), If package load fails, wget online version."
+  (require-else-fetch package packageDir url "wget" url "-P" packageDir))
 
-(cl-defun require-and-wget (package url &optional (packageDir (init-online-packages-directory package))) 
-  "Loads and requires packageName, fetching with wget unless already fetched"
-  (require-and-fetch-online package packageDir url "wget" url "-P" packageDir))
+(cl-defun require-online-package-else-wget (package url &optional (packageDir (init-online-packages-directory package))) 
+  "Fetches online version of package (unless already fetched), then loads and requires it."
+  (require-online-package-else-fetch package packageDir url "wget" url "-P" packageDir))
 
 
 ;;;;;;  Packages retrieved via wget
-(require-and-wget 'prolog "http://bruda.ca/_media/emacs/prolog.el")
+(require-online-package-else-wget 'prolog "http://bruda.ca/_media/emacs/prolog.el")
 
 
 
@@ -397,7 +397,7 @@
 ;;Spell check
 ;;;;;;
 
-(require-or-wget 'speck "http://www.emacswiki.org/emacs/download/speck.el")
+(require-else-wget 'speck "http://www.emacswiki.org/emacs/download/speck.el")
 
 ;;;;;;;
 ;;Edit-Server (for text areas in browsers)
@@ -432,7 +432,7 @@
 (global-linum-mode t)
 
 
-(require-and-git-clone 'linum-fixes "https://github.com/lalopmak/linum-fixes")
+(require-online-package-else-git-clone 'linum-fixes "https://github.com/lalopmak/linum-fixes")
 
 
 
