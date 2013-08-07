@@ -73,7 +73,7 @@
  '(rainbow-delimiters-depth-1-face ((t (:foreground "#556677"))))
  '(rainbow-delimiters-unmatched-face ((t (:foreground "red"))))
 
- '(show-paren-match ((((class color) (background dark)) (:background "azure2")))))
+ '(show-paren-match ((((class color) (background dark)) (:background "#999999")))))
 
 
 ;;;;;Package retrieval helpers
@@ -418,7 +418,14 @@
 ;;;;;;;
 
 (defvar init-centered-cursor nil, "Wheter or not we set centered cursor by default")
+(defvar init-blinking-cursor t, "Whether or not the cursor should blink")
+
 (defvar init-relative-mode nil, "Whether or not we start out with relative line numbers")
+
+(unless init-blinking-cursor (blink-cursor-mode 0))
+(setq blink-cursor-interval 0.7)
+
+
 
 ;;linum-relative starts on by default, toggle off if necessary
 (unless init-relative-mode (linum-relative-toggle))
