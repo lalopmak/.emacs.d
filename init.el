@@ -20,6 +20,8 @@
 
 ;;This script calls programs: git, ruby, wget
 
+
+
 (setq package-archives '(("melpa" . "http://melpa.milkbox.net/packages/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
@@ -49,6 +51,8 @@
 )
                     (install-if-necessary package))
 
+;;evals our libraries
+(load-file (expand-file-name "init-libraries.el" "~/.emacs.d/"))
 
 ;; rainbow delimiters
 (global-rainbow-delimiters-mode)
@@ -75,77 +79,6 @@
 
  '(show-paren-match ((((class color) (background dark)) (:background "#999999")))))
 
-
-;;;;;Package retrieval helpers
-
-;;the base directory for online retrieved packages
-(defvar online-packages-directory "~/.emacs.d/online-packages/") 
-
-(cl-defun init-online-packages-directory (package &optional (baseDir online-packages-directory)) 
-  "The directory in which this online package would be installed"
-  (file-truename (concat (file-name-as-directory baseDir) 
-                         (symbol-name package)))) 
-
-(defun execute-process (processName &rest processArgs)
-  "Executes a process with given args, all strings.  Returns status (check with zerop)"
-  (let ((process (or (executable-find processName)
-                            (error (concat "Unable to find " processName)))))
-    (apply 'call-process
-           process 
-           nil
-           nil
-           nil
-           processArgs)))
-
-
-(defun fetch-online (fetcher &rest processArgs)
-  "Loads and requires package, fetching with fetcher process if necessary"
-  (apply 'execute-process fetcher processArgs))
-
-(defun fetch-online-then-require (package url fetcher &rest processArgs)
-  "Fetches something online using the fetcher process with processArgs, then requires the associated package"
-  (if (zerop (apply 'fetch-online fetcher processArgs))
-        (require package)
-      (error "Couldn't fetch %s from %s" package url)))
-
-(defun require-else-fetch (package packageDir url fetcher &rest processArgs)
-  "Loads and requires package (possibly not online version), If package load fails, fetch online version."
-  (add-to-list 'load-path packageDir)
-  (unless (require package nil 'noerror)
-    (apply 'fetch-online-then-require package url fetcher processArgs)))
-
-(defun unless-dir-exists-fetch (packageDir fetcher &rest processArgs)
-  "If packageDir doesn't exist, fetch from online."
-  (add-to-list 'load-path packageDir)
-  (unless (file-exists-p packageDir)
-    (apply 'fetch-online fetcher processArgs)))
- 
-(defun require-online-package-else-fetch (package packageDir url fetcher &rest processArgs)
-  "Fetches online version of package (unless already fetched), then loads and requires it."
-  (add-to-list 'load-path packageDir)
-  (if (file-exists-p packageDir)
-      (require package)
-    (apply 'fetch-online-then-require package url fetcher processArgs)))
-
-(defun git-args (url dir)
-  "Returns the list of args to a git call"
-  (list "--no-pager" "clone" "-v" url (file-truename dir)))
-
-(cl-defun require-else-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
-  "Loads and requires package (possibly not online version), If package load fails, git clone online version."
-  (apply 'require-else-fetch package packageDir url "git" (git-args url packageDir)))
-
-(cl-defun require-online-package-else-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
-  "Fetches online version of package (unless already fetched), then loads and requires it."
-  (apply 'require-online-package-else-fetch package packageDir url "git" (git-args url packageDir)))
-
-(cl-defun unless-dir-exists-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
-  "If packageDir doesn't exist, clone from git url."
-  (apply 'unless-dir-exists-fetch packageDir "git" (git-args url packageDir)))
-
-(defun git-clone (url dir) 
-  "Loads and requires packageName, cloning from git url if not already fetched"
-  (apply 'fetch-online "git" (git-args url dir)))
 
 ;;;;;;;Packages retrieved via git
 
@@ -194,14 +127,6 @@
   (execute-process "ruby" (concat (file-name-as-directory init-snippets-dir) "update_snippets.rb")))
 
 
-
-(cl-defun require-else-wget (package url &optional (packageDir (init-online-packages-directory package))) 
-  "Loads and requires package (possibly not online version), If package load fails, wget online version."
-  (require-else-fetch package packageDir url "wget" url "-P" packageDir))
-
-(cl-defun require-online-package-else-wget (package url &optional (packageDir (init-online-packages-directory package))) 
-  "Fetches online version of package (unless already fetched), then loads and requires it."
-  (require-online-package-else-fetch package packageDir url "wget" url "-P" packageDir))
 
 
 ;;;;;;  Packages retrieved via wget
