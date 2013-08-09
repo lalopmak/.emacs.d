@@ -39,7 +39,7 @@
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode 
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode imenu-anywhere keyfreq
 ;;for clojure 
  auto-complete 
  paredit popup  rainbow-delimiters)
@@ -53,6 +53,7 @@
 
 ;;evals our libraries
 (load-file (expand-file-name "init-libraries.el" "~/.emacs.d/"))
+
 
 ;; rainbow delimiters
 (global-rainbow-delimiters-mode)
@@ -324,6 +325,12 @@
 
 (require-else-wget 'speck "http://www.emacswiki.org/emacs/download/speck.el")
 
+;;;;;;;;
+;;record key frequencies
+;;;;;;;;
+(keyfreq-mode 1)
+(keyfreq-autosave-mode 1)
+
 ;;;;;;;
 ;;Edit-Server (for text areas in browsers)
 ;;;;;;;
@@ -442,3 +449,5 @@
 
 (add-to-list 'load-path "~/.emacs.d/online-packages/lisptree")
 (require 'lisptree)
+
+
