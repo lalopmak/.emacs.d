@@ -39,7 +39,7 @@
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode imenu-anywhere keyfreq
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode imenu-anywhere markdown-mode nlinum
 ;;for clojure 
  auto-complete 
  paredit popup  rainbow-delimiters)
@@ -63,21 +63,18 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(completions-common-part ((t (:inherit default :foreground "red"))))
- '(diredp-compressed-file-suffix ((t (:foreground "#7b68ee"))))
- '(diredp-ignored-file-name ((t (:foreground "#aaaaaa"))))
-
+ '(diredp-compressed-file-suffix ((t (:foreground "#7b68ee"))) t)
+ '(diredp-ignored-file-name ((t (:foreground "#aaaaaa"))) t)
+ '(rainbow-delimiters-depth-1-face ((t (:foreground "#556677"))))
  '(rainbow-delimiters-depth-2-face ((t (:foreground "#8b7500"))))
  '(rainbow-delimiters-depth-3-face ((t (:foreground "#408000"))))
- '(rainbow-delimiters-depth-4-face ((t (:foreground "#003db4"))))  ;;bad blue
+ '(rainbow-delimiters-depth-4-face ((t (:foreground "#003db4"))))
  '(rainbow-delimiters-depth-5-face ((t (:foreground "#819a00"))))
  '(rainbow-delimiters-depth-6-face ((t (:foreground "#5393b3"))))
  '(rainbow-delimiters-depth-7-face ((t (:foreground "#e69500"))))
  '(rainbow-delimiters-depth-8-face ((t (:foreground "#009a63"))))
- '(rainbow-delimiters-depth-9-face ((t (:foreground ;;"#9110be"
-"purple"))))
- '(rainbow-delimiters-depth-1-face ((t (:foreground "#556677"))))
+ '(rainbow-delimiters-depth-9-face ((t (:foreground "purple"))))
  '(rainbow-delimiters-unmatched-face ((t (:foreground "red"))))
-
  '(show-paren-match ((((class color) (background dark)) (:background "#999999")))))
 
 
@@ -109,6 +106,10 @@
 
 (evil-mode 1)
 
+
+(require-online-package-else-git-clone 'stopwatch "https://github.com/lalopmak/stopwatch" )
+
+(require-online-package-else-git-clone 'expand-region "https://github.com/magnars/expand-region.el" )
 
 ;;tango color theme
 (require-else-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
@@ -235,7 +236,7 @@
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
+ ;; If there is more than one, they won't work right. 
  '(inhibit-startup-screen t))
 
 
@@ -328,6 +329,7 @@
 ;;;;;;;;
 ;;record key frequencies
 ;;;;;;;;
+(require-online-package-else-git-clone 'keyfreq "https://github.com/lalopmak/keyfreq")
 (keyfreq-mode 1)
 (keyfreq-autosave-mode 1)
 
@@ -357,23 +359,40 @@
 (unless init-blinking-cursor (blink-cursor-mode 0))
 (setq blink-cursor-interval 0.7)
 
+;;;;;;;
+;; Globalized nlinum mode, until they make official one
+;;;;;;;
+(define-globalized-minor-mode global-nlinum-mode nlinum-mode nlinum-on)
+(defun nlinum-on () (unless (minibufferp) (nlinum-mode 1)))
+(global-nlinum-mode 1)
 
+;;;;;;;;
+;;Init Mode: stuff to happen in every buffer
+;;;;;;;;
+(defun init-mode-on-new-buffer ()
+  "Commands we want to activate upon opening new file/buffer"
+  (nlinum-mode t)
+  (if init-centered-cursor (centered-cursor-mode t)))
+
+(define-minor-mode init-mode "Stuff to happen in every buffer")
+(define-globalized-minor-mode global-init-mode init-mode init-mode-on-new-buffer)
+(global-init-mode 1)
+;;;;;;;;
+
+
+;;Necessary since hooks don't seem to work in fundamental mode
+;;======
+(defadvice ido-find-file (after init-new-found-file ())
+  "Activates those commands upon opening file"
+  (init-mode-on-new-buffer))
+
+(defadvice ido-switch-buffer (after init-new-buffer ())
+  "Activate those commands upon switching buffer"
+  (init-mode-on-new-buffer))
+;;======
 
 ;;linum-relative starts on by default, toggle off if necessary
 (unless init-relative-mode (linum-relative-toggle))
-
-(defmacro init-activate-on-open ()
-  "Commands we want to activate upon opening new file/buffer"
-  `(progn (linum-mode t)
-          (if init-centered-cursor (centered-cursor-mode t))))
-
-;;Global mode for those same commands (because not all openings are covered by our advice)
-(global-linum-mode t)
-
-
-(require-online-package-else-git-clone 'linum-fixes "https://github.com/lalopmak/linum-fixes")
-
-
 
 (if init-centered-cursor (global-centered-cursor-mode t))
 
@@ -385,13 +404,8 @@
 ;;M-x downcase-region
 (put 'downcase-region 'disabled nil)
 
-(defadvice ido-find-file (after init-new-found-file ())
-  "Activates those commands upon opening file"
-  (init-activate-on-open))
 
-(defadvice ido-switch-buffer (after init-new-buffer ())
-  "Activate those commands upon switching buffer"
-  (init-activate-on-open))
+
 
 (column-number-mode 1)    ;  displays line and column number in status bar
 
@@ -416,7 +430,6 @@
 ;;avoiding issue where it's never used due to an intermediate kill
 (setq save-interprogram-paste-before-kill t)
 
-(ad-activate-all) ;activates all advice
 
 ;; Completing point by some yasnippet key
 (defun yas-ido-expand ()
@@ -449,5 +462,26 @@
 
 (add-to-list 'load-path "~/.emacs.d/online-packages/lisptree")
 (require 'lisptree)
+
+
+;; (defvar init-ace-jump-start-time)
+;; (defvar init-ace-jump-end-time)
+
+;; (defadvice ace-jump-char-mode (before before-ace-jump-char-mode)
+;;   "Initializes ace-jump timer"
+;;   (setq init-ace-jump-start-time (float-time)))
+
+;; (defadvice ace-jump-done (after after-ace-jumped)
+;;   "Displays time taken to ace-jump"
+;;   (setq init-ace-jump-end-time (float-time))
+;;   (run-at-time 0.5
+;;                nil
+;;                (lambda () (when init-ace-jump-start-time
+;;                             (message (format "Seconds taken to ace-jump: %f" 
+;;                                              (- init-ace-jump-end-time 
+;;                                                 init-ace-jump-start-time)))))))
+
+
+(ad-activate-all) ;activates all advice
 
 
