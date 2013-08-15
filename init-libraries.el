@@ -99,3 +99,7 @@
   "Fetches online version of package (unless already fetched), then loads and requires it."
   (require-online-package-else-fetch package packageDir url "wget" url "-P" packageDir))
 
+(defun buffer-directory ()
+  "Name of buffer's current directory, or nil if not a file"
+  (when buffer-file-name
+    (file-name-directory buffer-file-name)))

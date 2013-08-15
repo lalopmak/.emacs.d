@@ -65,6 +65,8 @@
  '(completions-common-part ((t (:inherit default :foreground "red"))))
  '(diredp-compressed-file-suffix ((t (:foreground "#7b68ee"))) t)
  '(diredp-ignored-file-name ((t (:foreground "#aaaaaa"))) t)
+ '(hl-line ((t (:inherit highlight :background ;#1f2f2f"
+"#243434"))))
  '(rainbow-delimiters-depth-1-face ((t (:foreground "#556677"))))
  '(rainbow-delimiters-depth-2-face ((t (:foreground "#8b7500"))))
  '(rainbow-delimiters-depth-3-face ((t (:foreground "#408000"))))
@@ -241,7 +243,7 @@
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right. 
+ ;; If there is more than one, they won't work right.
  '(inhibit-startup-screen t))
 
 
@@ -361,8 +363,13 @@
 
 (defvar init-relative-mode nil, "Whether or not we start out with relative line numbers")
 
-(unless init-blinking-cursor (blink-cursor-mode 0))
+(defvar init-highlight-line t, "Whether or not to highlight current line")
+
+;;cursor blinks every that number of seconds
 (setq blink-cursor-interval 0.7)
+
+
+(unless init-blinking-cursor (blink-cursor-mode 0))
 
 ;;;;;;;
 ;; Globalized nlinum mode, until they make official one
@@ -414,7 +421,7 @@
 
 (column-number-mode 1)    ;  displays line and column number in status bar
 
-;; (global-hl-line-mode 1) ; turn on highlighting current line
+(if init-highlight-line (global-hl-line-mode 1)) ; turn on highlighting current line
 (delete-selection-mode 1) ; delete seleted text when typing
 ;; (transient-mark-mode 1) ; highlight text selection
 ;; (setq show-paren-style 'expression) ; highlight entire bracket expression
@@ -435,6 +442,14 @@
 ;;avoiding issue where it's never used due to an intermediate kill
 (setq save-interprogram-paste-before-kill t)
 
+;; If parent directory of write-file doesn't exist, prompt user for creating it
+(add-hook 'before-save-hook
+          (lambda ()
+            (let ((parent (buffer-directory)))
+                (when (and parent
+                           (not (file-exists-p parent))
+                           (y-or-n-p (concat "Directory " parent " does not exist. Create it?")))
+                  (make-directory parent t)))))
 
 ;; Completing point by some yasnippet key
 (defun yas-ido-expand ()
