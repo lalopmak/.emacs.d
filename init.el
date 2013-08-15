@@ -468,25 +468,6 @@
 (add-to-list 'load-path "~/.emacs.d/online-packages/lisptree")
 (require 'lisptree)
 
-
-;; (defvar init-ace-jump-start-time)
-;; (defvar init-ace-jump-end-time)
-
-;; (defadvice ace-jump-char-mode (before before-ace-jump-char-mode)
-;;   "Initializes ace-jump timer"
-;;   (setq init-ace-jump-start-time (float-time)))
-
-;; (defadvice ace-jump-done (after after-ace-jumped)
-;;   "Displays time taken to ace-jump"
-;;   (setq init-ace-jump-end-time (float-time))
-;;   (run-at-time 0.5
-;;                nil
-;;                (lambda () (when init-ace-jump-start-time
-;;                             (message (format "Seconds taken to ace-jump: %f" 
-;;                                              (- init-ace-jump-end-time 
-;;                                                 init-ace-jump-start-time)))))))
-
-
 (ad-activate-all) ;activates all advice
 
 
