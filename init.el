@@ -338,8 +338,6 @@
 ;;;;;;;;
 (require-online-package-else-git-clone 'keyfreq "https://github.com/lalopmak/keyfreq")
 
-(setq keyfreq-file "~/.emacs.d/online-packages/keyfreq/.emacs.keyfreq")
-
 (keyfreq-mode 1)
 (keyfreq-autosave-mode 1)
 
