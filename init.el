@@ -88,13 +88,11 @@
 (require-online-package-else-git-clone 'surround "https://github.com/timcharper/evil-surround" )
 (global-surround-mode 1)
 
-(require-online-package-else-git-clone 'evil-nerd-commenter "https://github.com/redguardtoo/evil-nerd-commenter" )
-(define-key evil-normal-state-map ",ci" 'evilnc-comment-or-uncomment-lines)
-(define-key evil-normal-state-map ",cl" 'evilnc-comment-or-uncomment-to-the-line)
-(define-key evil-normal-state-map ",cc" 'evilnc-copy-and-comment-lines)
-(define-key evil-normal-state-map ",cp" 'evilnc-comment-or-uncomment-paragraphs)
+;; (require-online-package-else-git-clone 'evil-nerd-commenter "https://github.com/redguardtoo/evil-nerd-commenter" )
+(require-online-package-else-git-clone 'evil-nerd-commenter "https://github.com/lalopmak/evil-nerd-commenter" )
 
-
+(define-key evil-normal-state-map "," 'evilnc-comment-operator)
+(define-key evil-visual-state-map "," 'evilnc-comment-operator)
 ;;if local copy of undo-tree is required
 ;; (require-online-package-else-git-clone 'undo-tree "http://www.dr-qubit.org/git/undo-tree.git")
 
