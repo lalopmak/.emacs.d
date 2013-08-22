@@ -39,7 +39,7 @@
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode imenu-anywhere markdown-mode nlinum
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode imenu-anywhere markdown-mode nlinum 
 ;;for clojure 
  auto-complete 
  paredit popup  rainbow-delimiters)
@@ -47,7 +47,7 @@
                     (require package))
 
 ;;installs the following packages (without loading) if necessary
-(do-to-package-list '(dired+ auctex color-theme undo-tree  clojure-mode nrepl ac-nrepl 
+(do-to-package-list '(dired+ auctex color-theme undo-tree clojure-mode nrepl ac-nrepl 
 )
                     (install-if-necessary package))
 
@@ -107,10 +107,10 @@
 
 (unless-dir-exists-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
 (require 'lalopmak-evil)
+;; (require 'lalopmak-evil-default-comparison)
 ;; (require 'lalopmak-evil-mnemonic)
 
 (evil-mode 1)
-
 
 (require-online-package-else-git-clone 'stopwatch "https://github.com/lalopmak/stopwatch" )
 
@@ -158,7 +158,8 @@
 (setq
  el-get-sources
  '(el-get				; el-get is self-hosting
-   kill-ring-ido)) 
+   ;; kill-ring-ido                     ; just gonna fork this
+   )) 
 
 ;;adds the fetched el-get packages to load-path and requires them
 (do-to-package-list el-get-sources
@@ -166,9 +167,6 @@
                     (require package))                      
 
 (el-get 'sync el-get-sources)
-
-(global-set-key (kbd "M-y") 'kill-ring-ido)
-(setq kill-ring-ido-shortage-length 24) 
 
 (require 'recentf)
 (recentf-mode 1)
@@ -338,6 +336,16 @@
 
 (keyfreq-mode 1)
 (keyfreq-autosave-mode 1)
+
+
+;;;;;;;
+;;kill-ring-ido
+;;;;;;;
+
+(require-online-package-else-git-clone 'kill-ring-ido "https://github.com/lalopmak/kill-ring-ido")
+(global-set-key (kbd "M-y") 'kill-ring-ido)
+(setq kill-ring-ido-shortage-length 24) 
+
 
 ;;;;;;;
 ;;Edit-Server (for text areas in browsers)
