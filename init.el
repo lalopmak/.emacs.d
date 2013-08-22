@@ -487,8 +487,9 @@
 
 (put 'upcase-region 'disabled nil)
 
-(add-to-list 'load-path "~/.emacs.d/online-packages/lisptree")
-(require 'lisptree)
+(when (file-exists-p  "~/.emacs.d/online-packages/lisptree")
+  (add-to-list 'load-path "~/.emacs.d/online-packages/lisptree")
+  (require 'lisptree))
 
 (ad-activate-all) ;activates all advice
 
