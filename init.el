@@ -49,7 +49,11 @@
 ;;installs the following packages (without loading) if necessary
 (do-to-package-list '(dired+ auctex color-theme undo-tree clojure-mode nrepl ac-nrepl 
 )
-                    (install-if-necessary package))
+                    (if (listp package)
+                        ;;accepts lists like (downloaded-package required-package)
+                        (progn (install-if-necessary (car package)) 
+                               (require (cadr package)))
+                      (install-if-necessary package)))
 
 ;;evals our libraries
 (load-file (expand-file-name "init-libraries.el" "~/.emacs.d/"))
@@ -362,6 +366,25 @@
         (set-frame-size (selected-frame) 80 12))))
 
 ;;;;;;;
+;;Symbol prettification
+;;;;;;;
+
+(global-prettify-symbols-mode)
+
+(defvar init-pretty-symbols '(("lambda" . ?λ)
+                              ("->" . ?→)
+                              ("<-" . ?←)
+                              ("<=" . ?≤)
+                              ("=>" . ?≥)
+                              ("!=" . ?≠)
+))
+
+(defun init-add-pretty-symbols ()
+  "Adds init's collection of pretty symbols to prettify-symbols-alist"
+  (dolist (replacement init-pretty-symbols)
+    (push replacement prettify-symbols-alist)))
+
+;;;;;;;
 ;;Behaviors
 ;;;;;;;
 
@@ -391,6 +414,8 @@
 (defun init-mode-on-new-buffer ()
   "Commands we want to activate upon opening new file/buffer"
   (nlinum-mode t)
+  (init-add-pretty-symbols)
+  (prettify-symbols-mode)
   (if init-centered-cursor (centered-cursor-mode t)))
 
 (define-minor-mode init-mode "Stuff to happen in every buffer")
