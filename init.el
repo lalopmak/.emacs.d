@@ -31,27 +31,27 @@
 
 (defmacro do-to-package-list (packageList &rest body)
   "Does something to each package of a package list"
-  `(mapc (lambda (package) ,@body ) ,packageList)) 
+  `(mapc (lambda (package) ,@body ) ,packageList))
 
 (defun install-if-necessary (package)
   "Installs a package if it is not already"
-  (or (package-installed-p package) 
+  (or (package-installed-p package)
       (package-install package)))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode imenu-anywhere markdown-mode nlinum 
-;;for clojure 
- auto-complete 
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode imenu-anywhere markdown-mode nlinum
+;;for clojure
+ auto-complete
  paredit popup  rainbow-delimiters)
                     (install-if-necessary package)
                     (require package))
 
 ;;installs the following packages (without loading) if necessary
-(do-to-package-list '(dired+ auctex color-theme undo-tree clojure-mode nrepl ac-nrepl 
+(do-to-package-list '(dired+ auctex color-theme undo-tree clojure-mode nrepl ac-nrepl
 )
                     (if (listp package)
                         ;;accepts lists like (downloaded-package required-package)
-                        (progn (install-if-necessary (car package)) 
+                        (progn (install-if-necessary (car package))
                                (require (cadr package)))
                       (install-if-necessary package)))
 
@@ -84,6 +84,25 @@
  '(show-paren-match ((((class color) (background dark)) (:background "#999999")))))
 
 
+(defun add-modes-to-hooks (hooks modes)
+  "Takes lists of hooks and modes and adds all modes to hooks"
+  (dolist (hook hooks)
+    (dolist (mode modes)
+      (add-hook hook mode))))
+
+(defun add-mode-to-hooks (hooks mode)
+  "Takes list of hooks and a mode, adds mode to all hooks."
+  (add-modes-to-hooks hooks (list mode)))
+
+(defvar init-working-mode-hooks '(emacs-lisp-mode-hook
+                                  clojure-mode-hook
+                                  python-mode-hook
+                                  haskell-mode-hook
+                                  text-mode-hook
+                                  latex-mode-hook
+                                  )
+"Hooks for working modes (e.g. not git buffers)")
+
 ;;;;;;;Packages retrieved via git
 
 ;;evil
@@ -107,7 +126,7 @@
 ;;        (undo-tree-file (funcall undo-tree-concater 'undo-tree)))
 ;;   (unless (file-exists-p evil-undo-tree-file)
 ;;     (make-symbolic-link undo-tree-file evil-undo-tree-file)))
- 
+
 
 (unless-dir-exists-git-clone 'lalopmak-evil "https://github.com/lalopmak/lalopmak-evil" )
 (require 'lalopmak-evil)
@@ -130,7 +149,7 @@
 ;;Snippets collection
 (defvar init-snippets-dir "~/.emacs.d/snippets/")
 
-(unless (file-exists-p init-snippets-dir) 
+(unless (file-exists-p init-snippets-dir)
   ;;Clones the collection
   (git-clone "https://github.com/lalopmak/snippets" init-snippets-dir)
 
@@ -163,12 +182,12 @@
  el-get-sources
  '(el-get				; el-get is self-hosting
    ;; kill-ring-ido                     ; just gonna fork this
-   )) 
+   ))
 
 ;;adds the fetched el-get packages to load-path and requires them
 (do-to-package-list el-get-sources
                     (add-to-list 'load-path (init-online-packages-directory package "~/.emacs.d/el-get/"))
-                    (require package))                      
+                    (require package))
 
 (el-get 'sync el-get-sources)
 
@@ -192,16 +211,16 @@
       ido-record-commands t
       ido-max-work-directory-list 60   ; should be enough
       ido-max-work-file-list      100   ; remember many
-      ido-use-virtual-buffers t 
+      ido-use-virtual-buffers t
       )
 
-;; This tab override shouldn't be necessary given ido's default 
-;; configuration, but minibuffer-complete otherwise dominates the 
-;; tab binding because of my custom tab-completion-everywhere 
+;; This tab override shouldn't be necessary given ido's default
+;; configuration, but minibuffer-complete otherwise dominates the
+;; tab binding because of my custom tab-completion-everywhere
 ;; configuration.
 (defmacro add-ido-hook (key hook)
-  `(add-hook 'ido-setup-hook 
-             (lambda () 
+  `(add-hook 'ido-setup-hook
+             (lambda ()
                (define-key ido-completion-map ,key ,hook))))
 
 (add-ido-hook [tab] 'ido-next-match)
@@ -209,11 +228,11 @@
 (add-ido-hook [down] 'ido-next-match)
 
 (defun file-visited-by (name)
-  "Returns name of file visited by buffer [name], or nil if it's not visiting any" 
+  "Returns name of file visited by buffer [name], or nil if it's not visiting any"
   (buffer-file-name (get-buffer-create name)))
 
 (defun active-and-not-visiting-file (name)
-  (and (get-buffer name) (not (file-visited-by name)) )) 
+  (and (get-buffer name) (not (file-visited-by name)) ))
 
 (add-to-list 'ido-ignore-buffers 'active-and-not-visiting-file)
 
@@ -250,7 +269,7 @@
 (show-paren-mode 1)
 
 ;;byte-compiles .el files upon save
-(add-hook 'after-save-hook 
+(add-hook 'after-save-hook
           (lambda ()
             (if (eq major-mode 'emacs-lisp-mode)
                 (save-excursion (byte-compile-file buffer-file-name)))))
@@ -264,8 +283,8 @@
 
 (defun concat-with-space (head &rest tail)
   (if tail
-      (concat head 
-              " " 
+      (concat head
+              " "
               (apply 'concat-with-space tail))
     head))
 
@@ -288,7 +307,7 @@
   (list "lualatex"
         (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
 
-(add-hook 'LaTeX-mode-hook 'flymake-mode)	
+(add-hook 'LaTeX-mode-hook 'flymake-mode)
 
 (cl-defun latex-compile (&optional (file-name buffer-file-name))
   (interactive)
@@ -306,7 +325,7 @@
 
 ;;how to insert emacs at the end of frame: pick one
 (defvar emacs-title-format " @ emacs")
-;; (defvar emacs-title-format 
+;; (defvar emacs-title-format
 ;;   (concat " @ Emacs "
 ;;           emacs-version))
 
@@ -314,8 +333,8 @@
 (setq frame-title-format
       '("%b " (:eval (if (buffer-file-name)  ;adds the (directory)
                          (concat "("
-                                 (abbreviate-file-name (file-name-directory buffer-file-name)) 
-                                 ")"))) 
+                                 (abbreviate-file-name (file-name-directory buffer-file-name))
+                                 ")")))
         emacs-title-format))
 
 ;;;;;;;
@@ -324,7 +343,7 @@
 
 ;; (define-key evil-normal-state-map (kbd "SPC") 'ace-jump-mode)
 (setq ace-jump-mode-move-keys
-      (list    ?n ?e ?i ?o ?h ?u ?y ?k ?a ?t ?d ?w ?f ?p ?l ?r ?s ?v  
+      (list    ?n ?e ?i ?o ?h ?u ?y ?k ?a ?t ?d ?w ?f ?p ?l ?r ?s ?v
             ;;?N ?E ?I ?O ?K ?U ?Y ?L
             ))
 ;;;;;;;
@@ -348,7 +367,7 @@
 
 (require-online-package-else-git-clone 'kill-ring-ido "https://github.com/lalopmak/kill-ring-ido")
 (global-set-key (kbd "M-y") 'kill-ring-ido)
-(setq kill-ring-ido-shortage-length 24) 
+(setq kill-ring-ido-shortage-length 24)
 
 
 ;;;;;;;
@@ -369,7 +388,7 @@
 ;;Symbol prettification
 ;;;;;;;
 
-(global-prettify-symbols-mode)
+;; (global-prettify-symbols-mode)
 
 (defvar init-pretty-symbols '(("lambda" . ?λ)
                               ("->" . ?→)
@@ -384,6 +403,11 @@
   (dolist (replacement init-pretty-symbols)
     (push replacement prettify-symbols-alist)))
 
+(add-mode-to-hooks init-working-mode-hooks 'pretty-symbols-mode)
+
+;; (add-hook 'emacs-lisp-mode-hook 'pretty-symbols-mode)
+;; (add-hook 'clojure-mode-hook 'pretty-symbols-mode)
+  ;; (prettify-symbols-mode)
 ;;;;;;;
 ;;Behaviors
 ;;;;;;;
@@ -415,7 +439,6 @@
   "Commands we want to activate upon opening new file/buffer"
   (nlinum-mode t)
   (init-add-pretty-symbols)
-  (prettify-symbols-mode)
   (if init-centered-cursor (centered-cursor-mode t)))
 
 (define-minor-mode init-mode "Stuff to happen in every buffer")
@@ -517,5 +540,3 @@
   (require 'lisptree))
 
 (ad-activate-all) ;activates all advice
-
-
