@@ -405,6 +405,12 @@
 
 (defun init-add-pretty-symbols ()
   "Adds init's collection of pretty symbols to prettify-symbols-alist"
+  (unless (boundp 'prettify-symbols-alist)
+    (defvar-local prettify-symbols-alist nil
+  "Alist of symbol prettifications.
+Each element looks like (SYMBOL . CHARACTER), where the symbol
+matching SYMBOL (a string, not a regexp) will be shown as
+CHARACTER instead."))
   (dolist (replacement init-pretty-symbols)
     (push replacement prettify-symbols-alist)))
 
