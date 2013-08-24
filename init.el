@@ -38,6 +38,11 @@
   (or (package-installed-p package)
       (package-install package)))
 
+;; fetches the package repository lists if necessary
+(unless (and (boundp 'package-user-dir)
+             (file-exists-p package-user-dir))
+    (package-refresh-contents))
+
 ;; loads the listed packages, installing if necessary
 (do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode imenu-anywhere markdown-mode nlinum
 ;;for clojure
