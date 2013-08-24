@@ -417,7 +417,7 @@ CHARACTER instead."))
 (add-mode-to-hooks init-working-mode-hooks
                    (lambda ()
                      (when (fboundp 'pretty-symbols-mode)
-                       pretty-symbols-mode)))
+                       (pretty-symbols-mode))))
 
 ;; (add-hook 'emacs-lisp-mode-hook 'pretty-symbols-mode)
 ;; (add-hook 'clojure-mode-hook 'pretty-symbols-mode)
