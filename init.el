@@ -20,7 +20,7 @@
 
 ;;This script calls programs: git, ruby, wget
 
-
+(tool-bar-mode -1)
 
 (setq package-archives '(("melpa" . "http://melpa.milkbox.net/packages/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
@@ -44,7 +44,7 @@
     (package-refresh-contents))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server ace-jump-mode imenu-anywhere markdown-mode nlinum
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum ;;ww3m
 ;;for clojure
  auto-complete
  paredit popup  rainbow-delimiters)
@@ -116,6 +116,7 @@
 (require-online-package-else-git-clone 'surround "https://github.com/timcharper/evil-surround" )
 (global-surround-mode 1)
 
+
 ;; (require-online-package-else-git-clone 'evil-nerd-commenter "https://github.com/redguardtoo/evil-nerd-commenter" )
 (require-online-package-else-git-clone 'evil-nerd-commenter "https://github.com/lalopmak/evil-nerd-commenter" )
 
@@ -138,15 +139,32 @@
 ;; (require 'lalopmak-evil-default-comparison)
 ;; (require 'lalopmak-evil-mnemonic)
 
+
+(require-online-package-else-git-clone 'evil-leader "https://github.com/listintree/evil-leader" )
+
+(global-evil-leader-mode)
+(evil-leader/set-key
+  "e" 'file-file
+  "b" 'switch-to-buffer
+  "k" 'kill-buffer)
+
+(evil-leader/set-leader "SPC")
+
 (evil-mode 1)
 
 (require-online-package-else-git-clone 'stopwatch "https://github.com/lalopmak/stopwatch" )
 
 (require-online-package-else-git-clone 'expand-region "https://github.com/magnars/expand-region.el" )
 
-;;tango color theme
+;;Color Themes
+(require-else-git-clone 'obsidian-theme "https://github.com/mswift42/obsidian-theme")
 (require-else-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
-(add-to-list 'custom-theme-load-path (init-online-packages-directory 'color-theme-tangotango))
+
+(add-to-list 'custom-theme-load-path
+             (init-online-packages-directory 'color-theme-tangotango)
+             (init-online-packages-directory 'obsidian-theme))
+
+;; (load-theme 'obsidian t)
 (load-theme 'tangotango t)
 
 (setq-default frame-background-mode 'dark)
@@ -200,6 +218,7 @@
 (recentf-mode 1)
 (setq recentf-max-menu-items 50)
 
+(setq recentf-auto-cleanup 'never) ;;apparently needed for tramp
 
 (yas--initialize)
 (yas-global-mode 1)
@@ -379,15 +398,23 @@
 ;;Edit-Server (for text areas in browsers)
 ;;;;;;;
 
-(edit-server-start)
+;; (edit-server-start)
+
+(autoload 'edit-server-maybe-dehtmlize-buffer "edit-server-htmlize" "edit-server-htmlize" t)
+(autoload 'edit-server-maybe-htmlize-buffer   "edit-server-htmlize" "edit-server-htmlize" t)
 
 (add-hook 'edit-server-edit-mode-hook
-  (lambda()
-    ;;Adds spell check to edit-server
-    (speck-mode 1)
-    ;;Sets size
-    (if window-system
-        (set-frame-size (selected-frame) 80 12))))
+          (lambda()
+            ;;Adds spell check to edit-server
+            (speck-mode 1)
+            ;; (setq auto-save-interval 20) ; 20 letters
+            ;; (setq auto-save-timeout 10) ; ten idle seconds
+            ;;Sets size
+            (if window-system
+                (set-frame-size (selected-frame) 80 12))))
+
+(add-hook 'edit-server-start-hook 'edit-server-maybe-dehtmlize-buffer)
+(add-hook 'edit-server-done-hook  'edit-server-maybe-htmlize-buffer)
 
 ;;;;;;;
 ;;Symbol prettification
@@ -422,6 +449,23 @@ CHARACTER instead."))
 ;; (add-hook 'emacs-lisp-mode-hook 'pretty-symbols-mode)
 ;; (add-hook 'clojure-mode-hook 'pretty-symbols-mode)
   ;; (prettify-symbols-mode)
+
+;;;;;;;
+;;multiple cursors
+;;;;;;;
+
+;; next symbol to C-i
+;; (define-key input-decode-map (kbd "C-i") (kbd "H-i"))
+;; (global-set-key (kbd "H-i") 'mc/mark-next-like-this)
+
+;; (global-set-key (kbd "C-n") 'mc/mark-previous-like-this)
+
+;; (global-unset-key (kbd "C-/"))
+;; (global-set-key (kbd "C-/") 'mc/mark-all-symbols-like-this)
+
+(global-unset-key (kbd "C-<down-mouse-1>"))
+(global-set-key (kbd "C-<mouse-1>") 'mc/add-cursor-on-click)
+
 ;;;;;;;
 ;;Behaviors
 ;;;;;;;
@@ -438,6 +482,8 @@ CHARACTER instead."))
 
 
 (unless init-blinking-cursor (blink-cursor-mode 0))
+
+
 
 ;;;;;;;
 ;; Globalized nlinum mode, until they make official one
@@ -552,5 +598,8 @@ CHARACTER instead."))
 (when (file-exists-p  "~/.emacs.d/online-packages/lisptree")
   (add-to-list 'load-path "~/.emacs.d/online-packages/lisptree")
   (require 'lisptree))
+
+(require 'tramp)
+(setq tramp-default-method "scp")
 
 (ad-activate-all) ;activates all advice
