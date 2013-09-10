@@ -30,7 +30,9 @@
 (package-initialize)
 
 (defmacro do-to-package-list (packageList &rest body)
-  "Does something to each package of a package list"
+  "Does something to each package of a package list.
+
+Current package assigned to variable 'package'."
   `(mapc (lambda (package) ,@body ) ,packageList))
 
 (defun install-if-necessary (package)
@@ -44,7 +46,7 @@
     (package-refresh-contents))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum ;;ww3m
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum latex-pretty-symbols ;;ww3m
 ;;for clojure
  auto-complete
  paredit popup  rainbow-delimiters)
@@ -53,6 +55,9 @@
 
 ;;installs the following packages (without loading) if necessary
 (do-to-package-list '(dired+ auctex color-theme undo-tree clojure-mode nrepl ac-nrepl
+
+assemblage-theme
+soft-charcoal-theme
 )
                     (if (listp package)
                         ;;accepts lists like (downloaded-package required-package)
@@ -74,8 +79,8 @@
  '(completions-common-part ((t (:inherit default :foreground "red"))))
  '(diredp-compressed-file-suffix ((t (:foreground "#7b68ee"))) t)
  '(diredp-ignored-file-name ((t (:foreground "#aaaaaa"))) t)
- '(hl-line ((t (:inherit highlight :background ;#1f2f2f"
-"#243434"))))
+ ;; '(hl-line ((t (:inherit highlight :background ;#1f2f2f"
+;; "#243434"))))  ;;highlight for tangotango
  '(rainbow-delimiters-depth-1-face ((t (:foreground "#556677"))))
  '(rainbow-delimiters-depth-2-face ((t (:foreground "#8b7500"))))
  '(rainbow-delimiters-depth-3-face ((t (:foreground "#408000"))))
@@ -105,6 +110,7 @@
                                   haskell-mode-hook
                                   text-mode-hook
                                   latex-mode-hook
+                                  LaTeX-mode-hook
                                   )
 "Hooks for working modes (e.g. not git buffers)")
 
@@ -166,6 +172,7 @@
 
 ;; (load-theme 'obsidian t)
 (load-theme 'tangotango t)
+;; (load-theme 'soft-charcoal t)
 
 (setq-default frame-background-mode 'dark)
 
@@ -332,6 +339,7 @@
         (list "-file-line-error" "-draftmode" "-interaction=nonstopmode" file-name)))
 
 (add-hook 'LaTeX-mode-hook 'flymake-mode)
+;; (add-hook 'LaTeX-mode-hook 'latex-unicode-simplified)
 
 (cl-defun latex-compile (&optional (file-name buffer-file-name))
   (interactive)
@@ -370,6 +378,7 @@
       (list    ?n ?e ?i ?o ?h ?u ?y ?k ?a ?t ?d ?w ?f ?p ?l ?r ?s ?v
             ;;?N ?E ?I ?O ?K ?U ?Y ?L
             ))
+
 ;;;;;;;
 ;;Spell check
 ;;;;;;
@@ -475,7 +484,8 @@ CHARACTER instead."))
 
 (defvar init-relative-mode nil, "Whether or not we start out with relative line numbers")
 
-(defvar init-highlight-line t, "Whether or not to highlight current line")
+(defvar init-highlight-line-gui t, "Whether or not to highlight current line in a gui")
+(defvar init-highlight-line-terminal nil, "Whether or not to highlight current line in a terminal")
 
 ;;cursor blinks every that number of seconds
 (setq blink-cursor-interval 0.7)
@@ -497,6 +507,12 @@ CHARACTER instead."))
 ;;;;;;;;
 (defun init-mode-on-new-buffer ()
   "Commands we want to activate upon opening new file/buffer"
+  (if (and init-highlight-line-gui
+           (display-graphic-p))
+      (hl-line-mode 1))
+  (if (and init-highlight-line-terminal
+           (not (display-graphic-p)))
+      (hl-line-mode 1)) ; turn on highlighting current line
   (nlinum-mode t)
   (init-add-pretty-symbols)
   (if init-centered-cursor (centered-cursor-mode t)))
@@ -536,7 +552,6 @@ CHARACTER instead."))
 
 (column-number-mode 1)    ;  displays line and column number in status bar
 
-(if init-highlight-line (global-hl-line-mode 1)) ; turn on highlighting current line
 (delete-selection-mode 1) ; delete seleted text when typing
 ;; (transient-mark-mode 1) ; highlight text selection
 ;; (setq show-paren-style 'expression) ; highlight entire bracket expression
