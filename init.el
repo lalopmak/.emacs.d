@@ -46,7 +46,7 @@ Current package assigned to variable 'package'."
     (package-refresh-contents))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum latex-pretty-symbols ;;ww3m
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum latex-pretty-symbols anaphora combinators kmacro-decision ;;ww3m
 ;;for clojure
  auto-complete
  paredit popup  rainbow-delimiters)
@@ -487,6 +487,9 @@ CHARACTER instead."))
 (defvar init-highlight-line-gui t, "Whether or not to highlight current line in a gui")
 (defvar init-highlight-line-terminal nil, "Whether or not to highlight current line in a terminal")
 
+(defvar init-use-header-for-notify-files-changed t, "Whether or not to popup header saying that file has been externally modified")
+(defvar init-notify-files-changed-interval 5, "Time in seconds between checking for file changes")
+
 ;;cursor blinks every that number of seconds
 (setq blink-cursor-interval 0.7)
 
@@ -547,6 +550,51 @@ CHARACTER instead."))
 ;;M-x downcase-region
 (put 'downcase-region 'disabled nil)
 
+(defun init-reload-buffer ()
+  "Reloads current buffer from file.  If init-use-header-for-notify-files-changed non-nil, clears header since we are saving."
+  (interactive)
+  (revert-buffer t t)
+  (when init-use-header-for-notify-files-changed
+    (setq header-line-format nil)))
+
+(defun init-notify-files-changed (&optional showheader)
+  "With showheader nil, causes emacs to check if file associated with each visible buffer has been externally modified.
+
+With showheader non-nil, also creates a header-line if this is so."
+  (loop for frame in (frame-list)
+        do (loop for window in (window-list frame)
+                 do (let ((buffer (window-buffer window)))
+                      (set-buffer buffer)
+                      (if showheader
+                          (if (and ;; (buffer-file-name buffer)
+                               (not (verify-visited-file-modtime buffer)))
+                              (let* ((long-filename (abbreviate-file-name (buffer-file-name buffer)))
+                                     (init-reload-buffer-binding (car (where-is-internal 'init-reload-buffer)))
+                                     (init-reload-buffer-str (if init-reload-buffer-binding
+                                                                 (key-description init-reload-buffer-binding)
+                                                               "M-x init-reload-buffer"))
+                                     (header (lambda (filename)
+                                               (format "%s. Press %s to reload it"
+                                                       (propertize (format "The file %s has changed on disk" filename)
+                                                                   'face '(:foreground "#cc1122"))
+                                                       init-reload-buffer-str)))
+                                     (longheader-str (funcall header long-filename))
+                                     (longheader-len (length longheader))
+                                     (header-str (if (> longheader-len (window-width window))
+                                                         (funcall header (file-name-nondirectory long-filename))
+                                                       longheader)))
+                                    (setq header-line-format header-str))
+                           (setq header-line-format nil))
+                        (verify-visited-file-modtime buffer))))))
+
+(global-set-key (kbd "<f5>") 'init-reload-buffer)
+
+(if (not init-use-header-for-notify-files-changed)
+    (run-at-time nil init-notify-files-changed-interval (lambda () (init-notify-files-changed nil)))
+  (add-hook 'before-save-hook
+            (lambda ()
+              (setq header-line-format nil)))
+  (run-at-time nil init-notify-files-changed-interval (lambda () (init-notify-files-changed t))))
 
 
 
@@ -567,6 +615,12 @@ CHARACTER instead."))
 ;; (global-set-key "\M-w" 'clipboard-kill-ring-save)
 
 (global-set-key "\C-y" 'clipboard-yank)
+
+ (defun yank-pop-forwards (arg)
+      (interactive "p")
+      (yank-pop (- arg)))
+
+(global-set-key "\M-Y" 'yank-pop-forwards) ; M-Y (Meta-Shift-Y)
 
 ;;Makes sure the top of the clipboard is saved onto our kill ring beforehand
 ;;avoiding issue where it's never used due to an intermediate kill
