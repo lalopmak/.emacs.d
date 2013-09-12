@@ -145,16 +145,11 @@ soft-charcoal-theme
 ;; (require 'lalopmak-evil-default-comparison)
 ;; (require 'lalopmak-evil-mnemonic)
 
+(defun copy-register (source destination)
+  "Copies content of source register to destination register"
+  (interactive "*cSource Register: \ncDestination Register:")
+  (set-register destination (get-register source)))
 
-(require-online-package-else-git-clone 'evil-leader "https://github.com/listintree/evil-leader" )
-
-(global-evil-leader-mode)
-(evil-leader/set-key
-  "e" 'file-file
-  "b" 'switch-to-buffer
-  "k" 'kill-buffer)
-
-(evil-leader/set-leader "SPC")
 
 (evil-mode 1)
 
@@ -550,43 +545,7 @@ CHARACTER instead."))
 ;;M-x downcase-region
 (put 'downcase-region 'disabled nil)
 
-(defun init-reload-buffer ()
-  "Reloads current buffer from file.  If init-use-header-for-notify-files-changed non-nil, clears header since we are saving."
-  (interactive)
-  (revert-buffer t t)
-  (when init-use-header-for-notify-files-changed
-    (setq header-line-format nil)))
-
-(defun init-notify-files-changed (&optional showheader)
-  "With showheader nil, causes emacs to check if file associated with each visible buffer has been externally modified.
-
-With showheader non-nil, also creates a header-line if this is so."
-  (loop for frame in (frame-list)
-        do (loop for window in (window-list frame)
-                 do (let ((buffer (window-buffer window)))
-                      (set-buffer buffer)
-                      (if showheader
-                          (if (and ;; (buffer-file-name buffer)
-                               (not (verify-visited-file-modtime buffer)))
-                              (let* ((long-filename (abbreviate-file-name (buffer-file-name buffer)))
-                                     (init-reload-buffer-binding (car (where-is-internal 'init-reload-buffer)))
-                                     (init-reload-buffer-str (if init-reload-buffer-binding
-                                                                 (key-description init-reload-buffer-binding)
-                                                               "M-x init-reload-buffer"))
-                                     (header (lambda (filename)
-                                               (format "%s. Press %s to reload it"
-                                                       (propertize (format "The file %s has changed on disk" filename)
-                                                                   'face '(:foreground "#cc1122"))
-                                                       init-reload-buffer-str)))
-                                     (longheader-str (funcall header long-filename))
-                                     (longheader-len (length longheader))
-                                     (header-str (if (> longheader-len (window-width window))
-                                                         (funcall header (file-name-nondirectory long-filename))
-                                                       longheader)))
-                                    (setq header-line-format header-str))
-                           (setq header-line-format nil))
-                        (verify-visited-file-modtime buffer))))))
-
+;;;Reloading buffer/checking for external modification
 (global-set-key (kbd "<f5>") 'init-reload-buffer)
 
 (if (not init-use-header-for-notify-files-changed)

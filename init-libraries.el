@@ -18,19 +18,19 @@
 ;;;;;Package retrieval helpers
 
 ;;the base directory for online retrieved packages
-(defvar online-packages-directory "~/.emacs.d/online-packages/") 
+(defvar online-packages-directory "~/.emacs.d/online-packages/")
 
-(cl-defun init-online-packages-directory (package &optional (baseDir online-packages-directory)) 
+(cl-defun init-online-packages-directory (package &optional (baseDir online-packages-directory))
   "The directory in which this online package would be installed"
-  (file-truename (concat (file-name-as-directory baseDir) 
-                         (symbol-name package)))) 
+  (file-truename (concat (file-name-as-directory baseDir)
+                         (symbol-name package))))
 
 (defun execute-process (processName &rest processArgs)
   "Executes a process with given args, all strings.  Returns status (check with zerop)"
   (let ((process (or (executable-find processName)
                             (error (concat "Unable to find " processName)))))
     (apply 'call-process
-           process 
+           process
            nil
            nil
            nil
@@ -58,7 +58,7 @@
   (add-to-list 'load-path packageDir)
   (unless (file-exists-p packageDir)
     (apply 'fetch-online fetcher processArgs)))
- 
+
 (defun require-online-package-else-fetch (package packageDir url fetcher &rest processArgs)
   "Fetches online version of package (unless already fetched), then loads and requires it."
   (add-to-list 'load-path packageDir)
@@ -72,30 +72,30 @@
   "Returns the list of args to a git call"
   (list "--no-pager" "clone" "-v" url (file-truename dir)))
 
-(cl-defun require-else-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
+(cl-defun require-else-git-clone (package url &optional (packageDir (init-online-packages-directory package)))
   "Loads and requires package (possibly not online version), If package load fails, git clone online version."
   (apply 'require-else-fetch package packageDir url "git" (git-args url packageDir)))
 
-(cl-defun require-online-package-else-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
+(cl-defun require-online-package-else-git-clone (package url &optional (packageDir (init-online-packages-directory package)))
   "Fetches online version of package (unless already fetched), then loads and requires it."
   (apply 'require-online-package-else-fetch package packageDir url "git" (git-args url packageDir)))
 
-(cl-defun unless-dir-exists-git-clone (package url &optional (packageDir (init-online-packages-directory package))) 
+(cl-defun unless-dir-exists-git-clone (package url &optional (packageDir (init-online-packages-directory package)))
   "If packageDir doesn't exist, clone from git url."
   (apply 'unless-dir-exists-fetch packageDir "git" (git-args url packageDir)))
 
-(defun git-clone (url dir) 
+(defun git-clone (url dir)
   "Loads and requires packageName, cloning from git url if not already fetched"
   (apply 'fetch-online "git" (git-args url dir)))
 
 
 ;;;wget fetchers
 
-(cl-defun require-else-wget (package url &optional (packageDir (init-online-packages-directory package))) 
+(cl-defun require-else-wget (package url &optional (packageDir (init-online-packages-directory package)))
   "Loads and requires package (possibly not online version), If package load fails, wget online version."
   (require-else-fetch package packageDir url "wget" url "-P" packageDir))
 
-(cl-defun require-online-package-else-wget (package url &optional (packageDir (init-online-packages-directory package))) 
+(cl-defun require-online-package-else-wget (package url &optional (packageDir (init-online-packages-directory package)))
   "Fetches online version of package (unless already fetched), then loads and requires it."
   (require-online-package-else-fetch package packageDir url "wget" url "-P" packageDir))
 
@@ -103,3 +103,64 @@
   "Name of buffer's current directory, or nil if not a file"
   (when buffer-file-name
     (file-name-directory buffer-file-name)))
+
+(defun init-reload-buffer ()
+  "Reloads current buffer from file.  If init-use-header-for-notify-files-changed non-nil, clears header since we are saving."
+  (interactive)
+  (revert-buffer t t)
+  (when init-use-header-for-notify-files-changed
+    (setq header-line-format nil)))
+
+(defmacro loop-frames-windows (args &rest code)
+  "Executes code for every window in every frame.
+
+args is a tuple (frame-arg window-arg &optional buffer-arg)
+
+The variable frame-arg will contain the current frame, and be usable
+in code.  Similarly for window-arg and buffer-arg.
+
+e.g. (loop-frames-windows (frame window buffer) stuff)"
+  (let* ((frame-arg (car args))
+        (window-arg (cadr args))
+        (buffer-arg (caddr args))
+        (tail (if buffer-arg
+                  `((let ((,buffer-arg (window-buffer ,window-arg)))
+                              ,@code))
+                code)))
+    `(loop for ,frame-arg in (frame-list)
+           do (loop for ,window-arg in (window-list ,frame-arg)
+                    do ,@tail))))
+
+(defun init-notify-files-changed (&optional showheader)
+  "With showheader nil, causes emacs to check if file associated with each visible buffer has been externally modified.
+
+With showheader non-nil, also creates a header-line if this is so."
+  (loop-frames-windows (frame window buffer)
+                       (set-buffer buffer)
+                       (cond ((not showheader) (verify-visited-file-modtime buffer))  ;;only trigger file recheck (side-effect)
+                             ((verify-visited-file-modtime buffer) (setq header-line-format nil))  ;; file has not been externally written to
+                             ;;file has been externally written to; show the header
+                             (t (let* ((long-filename (abbreviate-file-name (buffer-file-name buffer)))
+                                       (short-filename (file-name-nondirectory long-filename))
+                                       (init-reload-buffer-binding (car (where-is-internal 'init-reload-buffer)))
+                                       (init-reload-buffer-str (if init-reload-buffer-binding
+                                                                   (key-description init-reload-buffer-binding)
+                                                                 "M-x init-reload-buffer"))
+                                       (header (lambda (filename &optional shorten)
+                                                 (format "%s. Press %s to reload%s"
+                                                         (propertize (format "%s%s %s"
+                                                                             (if shorten "" "The file ")
+                                                                             filename
+                                                                             (if shorten "changed" "has changed on disk"))
+                                                                     'face '(:foreground "#cc1122"))
+                                                         init-reload-buffer-str
+                                                         (if shorten "" " it"))))
+                                       (longheader-str (funcall header long-filename))
+                                       (medheader-str (funcall header short-filename))
+                                       (longheader-len (length longheader-str))
+                                       (medheader-len (length medheader-str))
+                                       (width (window-width window))
+                                       (header-str (cond ((> width longheader-len) longheader-str)
+                                                         ((> width medheader-len) medheader-str)
+                                                         (t (funcall header short-filename 'shorten)))))
+                                  (setq header-line-format header-str))))))
