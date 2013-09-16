@@ -112,55 +112,56 @@
     (setq header-line-format nil)))
 
 (defmacro loop-frames-windows (args &rest code)
-  "Executes code for every window in every frame.
+  "Executes CODE for every window in every frame.
 
-args is a tuple (frame-arg window-arg &optional buffer-arg)
+ARGS is a tuple (frame-arg window-arg &optional buffer-arg)
 
-The variable frame-arg will contain the current frame, and be usable
-in code.  Similarly for window-arg and buffer-arg.
+The user-designated variable frame-arg will contain the current frame,
+and be usable in CODE.  Similarly for window-arg and buffer-arg.
 
-e.g. (loop-frames-windows (frame window buffer) stuff)"
+Example usage: (loop-frames-windows (frame window buffer) ...)"
+  (declare (indent defun))
   (let* ((frame-arg (car args))
-        (window-arg (cadr args))
-        (buffer-arg (caddr args))
-        (tail (if buffer-arg
-                  `((let ((,buffer-arg (window-buffer ,window-arg)))
-                              ,@code))
-                code)))
+         (window-arg (cadr args))
+         (buffer-arg (caddr args))
+         (tail (if buffer-arg
+                   `((let ((,buffer-arg (window-buffer ,window-arg)))
+                       ,@code))
+                 code)))
     `(loop for ,frame-arg in (frame-list)
            do (loop for ,window-arg in (window-list ,frame-arg)
                     do ,@tail))))
 
 (defun init-notify-files-changed (&optional showheader)
-  "With showheader nil, causes emacs to check if file associated with each visible buffer has been externally modified.
+  "With SHOWHEADER nil, causes emacs to check if file associated with each visible buffer has been externally modified.
 
-With showheader non-nil, also creates a header-line if this is so."
+With SHOWHEADER non-nil, also creates a header-line if this is so."
   (loop-frames-windows (frame window buffer)
-                       (set-buffer buffer)
-                       (cond ((not showheader) (verify-visited-file-modtime buffer))  ;;only trigger file recheck (side-effect)
-                             ((verify-visited-file-modtime buffer) (setq header-line-format nil))  ;; file has not been externally written to
-                             ;;file has been externally written to; show the header
-                             (t (let* ((long-filename (abbreviate-file-name (buffer-file-name buffer)))
-                                       (short-filename (file-name-nondirectory long-filename))
-                                       (init-reload-buffer-binding (car (where-is-internal 'init-reload-buffer)))
-                                       (init-reload-buffer-str (if init-reload-buffer-binding
-                                                                   (key-description init-reload-buffer-binding)
-                                                                 "M-x init-reload-buffer"))
-                                       (header (lambda (filename &optional shorten)
-                                                 (format "%s. Press %s to reload%s"
-                                                         (propertize (format "%s%s %s"
-                                                                             (if shorten "" "The file ")
-                                                                             filename
-                                                                             (if shorten "changed" "has changed on disk"))
-                                                                     'face '(:foreground "#cc1122"))
-                                                         init-reload-buffer-str
-                                                         (if shorten "" " it"))))
-                                       (longheader-str (funcall header long-filename))
-                                       (medheader-str (funcall header short-filename))
-                                       (longheader-len (length longheader-str))
-                                       (medheader-len (length medheader-str))
-                                       (width (window-width window))
-                                       (header-str (cond ((> width longheader-len) longheader-str)
-                                                         ((> width medheader-len) medheader-str)
-                                                         (t (funcall header short-filename 'shorten)))))
-                                  (setq header-line-format header-str))))))
+    (set-buffer buffer)
+    (cond ((not showheader) (verify-visited-file-modtime buffer))  ;;only trigger file recheck (side-effect)
+          ((verify-visited-file-modtime buffer) (setq header-line-format nil))  ;; file has not been externally written to
+          ;;file has been externally written to; show the header
+          (t (let* ((long-filename (abbreviate-file-name (buffer-file-name buffer)))
+                    (short-filename (file-name-nondirectory long-filename))
+                    (init-reload-buffer-binding (car (where-is-internal 'init-reload-buffer)))
+                    (init-reload-buffer-str (if init-reload-buffer-binding
+                                                (key-description init-reload-buffer-binding)
+                                              "M-x init-reload-buffer"))
+                    (header (lambda (filename &optional shorten)
+                              (format "%s. Press %s to reload%s"
+                                      (propertize (format "%s%s %s"
+                                                          (if shorten "" "The file ")
+                                                          filename
+                                                          (if shorten "changed" "has changed on disk"))
+                                                  'face '(:foreground "#cc1122"))
+                                      init-reload-buffer-str
+                                      (if shorten "" " it"))))
+                    (longheader-str (funcall header long-filename))
+                    (medheader-str (funcall header short-filename))
+                    (longheader-len (length longheader-str))
+                    (medheader-len (length medheader-str))
+                    (width (window-width window))
+                    (header-str (cond ((> width longheader-len) longheader-str)
+                                      ((> width medheader-len) medheader-str)
+                                      (t (funcall header short-filename 'shorten)))))
+               (setq header-line-format header-str))))))

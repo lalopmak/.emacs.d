@@ -381,12 +381,9 @@ soft-charcoal-theme
 (require-else-wget 'speck "http://www.emacswiki.org/emacs/download/speck.el")
 
 ;;;;;;;;
-;;record key frequencies
+;;record key frequencies (most run at init-delayed-startup-actions)
 ;;;;;;;;
 (require-online-package-else-git-clone 'keyfreq "https://github.com/lalopmak/keyfreq")
-
-(keyfreq-mode 1)
-(keyfreq-autosave-mode 1)
 
 
 ;;;;;;;
@@ -399,10 +396,9 @@ soft-charcoal-theme
 
 
 ;;;;;;;
-;;Edit-Server (for text areas in browsers)
+;;Edit-Server (for text areas in browsers) - see also init-delayed-startup-actions
 ;;;;;;;
 
-;; (edit-server-start)
 
 (autoload 'edit-server-maybe-dehtmlize-buffer "edit-server-htmlize" "edit-server-htmlize" t)
 (autoload 'edit-server-maybe-htmlize-buffer   "edit-server-htmlize" "edit-server-htmlize" t)
@@ -467,8 +463,8 @@ CHARACTER instead."))
 ;; (global-unset-key (kbd "C-/"))
 ;; (global-set-key (kbd "C-/") 'mc/mark-all-symbols-like-this)
 
-(global-unset-key (kbd "C-<down-mouse-1>"))
-(global-set-key (kbd "C-<mouse-1>") 'mc/add-cursor-on-click)
+;; (global-unset-key (kbd "C-<down-mouse-1>"))
+;; (global-set-key (kbd "C-<mouse-1>") 'mc/add-cursor-on-click)
 
 ;;;;;;;
 ;;Behaviors
@@ -492,6 +488,25 @@ CHARACTER instead."))
 (unless init-blinking-cursor (blink-cursor-mode 0))
 
 
+;;;;;;
+;; Delayed startup function
+;;;;;;
+
+(defvar init-delayed-startup-time 15, "Time in seconds to delay init-delayed-startup-actions")
+
+(defun init-delayed-startup-actions ()
+  "Actions to perform after a delay."
+  (when (boundp 'server-name)
+    ;; Edit server being started instead by
+    ;;      alias editserver='emacsclient -a "" -s "Edit Server" -e "(edit-server-start)"'
+    ;; (when (equal server-name "Edit Server")
+    ;;   (edit-server-start))
+    (when (member server-name '("User Server" "Edit Server"))
+      (keyfreq-mode 1)
+      (keyfreq-autosave-mode 1))))
+
+(when init-delayed-startup-time
+  (run-at-time init-delayed-startup-time nil 'init-delayed-startup-actions))
 
 ;;;;;;;
 ;; Globalized nlinum mode, until they make official one
