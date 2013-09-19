@@ -57,7 +57,6 @@ Current package assigned to variable 'package'."
 (do-to-package-list '(dired+ auctex color-theme undo-tree clojure-mode nrepl ac-nrepl
 
 assemblage-theme
-soft-charcoal-theme
 )
                     (if (listp package)
                         ;;accepts lists like (downloaded-package required-package)
@@ -160,16 +159,18 @@ soft-charcoal-theme
 ;;Color Themes
 (require-else-git-clone 'obsidian-theme "https://github.com/mswift42/obsidian-theme")
 (require-else-git-clone 'color-theme-tangotango "https://github.com/juba/color-theme-tangotango")
+(require-else-git-clone 'soft-charcoal-theme "https://github.com/lalopmak/soft-charcoal-theme")
 
 (add-to-list 'custom-theme-load-path
              (init-online-packages-directory 'color-theme-tangotango)
              (init-online-packages-directory 'obsidian-theme))
 
 ;; (load-theme 'obsidian t)
-(load-theme 'tangotango t)
-;; (load-theme 'soft-charcoal t)
+;; (load-theme 'tangotango t)
+(load-theme 'soft-charcoal t)
 
 (setq-default frame-background-mode 'dark)
+(set-face-attribute 'default nil :height 120)
 
 ;;Snippets collection
 (defvar init-snippets-dir "~/.emacs.d/snippets/")
@@ -346,6 +347,16 @@ soft-charcoal-theme
 
 
 (evil-ex-define-cmd "latex" 'latex-compile)
+
+;;;;;;;;;;;;;;;;
+;;File managers
+;;;;;;;;;;;;;;;;
+
+(lalopmak-evil-file-manager-cmd "nemo")
+(lalopmak-evil-file-manager-cmd "thunar")
+
+
+
 ;;;;;;;;;;;;;;;;
 ;;Frame title setter
 ;;;;;;;;;;;;;;;;
@@ -385,6 +396,16 @@ soft-charcoal-theme
 ;;;;;;;;
 (require-online-package-else-git-clone 'keyfreq "https://github.com/lalopmak/keyfreq")
 
+;;;;;;;
+;;Auto Complete
+;;;;;;;
+
+(global-auto-complete-mode t)
+
+(require 'auto-complete-config)
+
+;; (add-to-list 'ac-dictionary-directories "")
+(ac-config-default)
 
 ;;;;;;;
 ;;kill-ring-ido
@@ -472,6 +493,7 @@ CHARACTER instead."))
 
 (defvar init-centered-cursor nil, "Wheter or not we set centered cursor by default")
 (defvar init-blinking-cursor t, "Whether or not the cursor should blink")
+(defvar init-cursor-color "#ffffff", "Cursor color")
 
 (defvar init-relative-mode nil, "Whether or not we start out with relative line numbers")
 
@@ -484,9 +506,8 @@ CHARACTER instead."))
 ;;cursor blinks every that number of seconds
 (setq blink-cursor-interval 0.7)
 
-
+(when init-cursor-color (set-cursor-color init-cursor-color))
 (unless init-blinking-cursor (blink-cursor-mode 0))
-
 
 ;;;;;;
 ;; Delayed startup function

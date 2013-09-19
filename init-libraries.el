@@ -28,7 +28,7 @@
 (defun execute-process (processName &rest processArgs)
   "Executes a process with given args, all strings.  Returns status (check with zerop)"
   (let ((process (or (executable-find processName)
-                            (error (concat "Unable to find " processName)))))
+                     (error (concat "Unable to find " processName)))))
     (apply 'call-process
            process
            nil
