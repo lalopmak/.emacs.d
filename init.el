@@ -349,13 +349,26 @@ assemblage-theme
 (evil-ex-define-cmd "latex" 'latex-compile)
 
 ;;;;;;;;;;;;;;;;
-;;File managers
+;;External Processes
 ;;;;;;;;;;;;;;;;
 
-(lalopmak-evil-file-manager-cmd "nemo")
-(lalopmak-evil-file-manager-cmd "thunar")
+(lalopmak-evil-directory-process "nemo")
+(lalopmak-evil-directory-process "thunar")
 
+;;ranger (in gnome-terminal)
+(lalopmak-evil-directory-process "gnome-terminal"
+  "--command=ranger \"%s\""
+  t
+  "lalopmak-evil-ranger"
+  "ranger")
 
+;;gnome-terminal
+(lalopmak-evil-directory-process "gnome-terminal"
+  "--working-directory="
+  nil
+  nil
+  "shell")
+(evil-ex-define-cmd "gnome-terminal" "shell")
 
 ;;;;;;;;;;;;;;;;
 ;;Frame title setter

@@ -36,6 +36,16 @@
            nil
            processArgs)))
 
+(defun execute-process-noblock (processName &rest processArgs)
+  "Executes a process with given args, all strings.  Does not wait for PROCESSNAME to terminate; returns nil."
+  (let ((process (or (executable-find processName)
+                     (error (concat "Unable to find " processName)))))
+    (apply 'call-process
+           process
+           nil
+           0
+           nil
+           processArgs)))
 
 (defun fetch-online (fetcher &rest processArgs)
   "Loads and requires package, fetching with fetcher process if necessary"
