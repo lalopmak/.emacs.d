@@ -230,6 +230,10 @@ assemblage-theme
 (require 'ido)
 (ido-mode 'both) ;; for buffers and files
 
+(define-key ido-common-completion-map " " (lambda ()
+                                            (interactive)
+                                            (insert " ")))
+
 (setq ido-enable-flex-matching t
       ido-everywhere t
       ido-save-directory-list-file "~/.emacs.d/cache/ido.last"
