@@ -230,10 +230,6 @@ assemblage-theme
 (require 'ido)
 (ido-mode 'both) ;; for buffers and files
 
-(define-key ido-common-completion-map " " (lambda ()
-                                            (interactive)
-                                            (insert " ")))
-
 (setq ido-enable-flex-matching t
       ido-everywhere t
       ido-save-directory-list-file "~/.emacs.d/cache/ido.last"
@@ -254,7 +250,14 @@ assemblage-theme
              (lambda ()
                (define-key ido-completion-map ,key ,hook))))
 
-(add-ido-hook [tab] 'ido-next-match)
+;; (define-key ido-common-completion-map " " (lambda ()
+;;                                             (interactive)
+;;                                             (insert " ")))
+
+(add-ido-hook " "
+              'ido-complete-space)
+(add-ido-hook [tab] 'ido-restrict-to-matches)
+(add-ido-hook [?\C- ] (lambda () (interactive (insert " "))))
 (add-ido-hook [up] 'ido-prev-match)
 (add-ido-hook [down] 'ido-next-match)
 
