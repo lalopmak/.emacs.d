@@ -250,14 +250,18 @@ assemblage-theme
              (lambda ()
                (define-key ido-completion-map ,key ,hook))))
 
-;; (define-key ido-common-completion-map " " (lambda ()
-;;                                             (interactive)
-;;                                             (insert " ")))
-
-(add-ido-hook " "
+(add-ido-hook [tab]
               'ido-complete-space)
-(add-ido-hook [tab] 'ido-restrict-to-matches)
+;; (add-ido-hook " " (lambda () (interactive (insert " "))))
+(add-ido-hook " " 'ido-restrict-to-matches)
 (add-ido-hook [?\C- ] (lambda () (interactive (insert " "))))
+
+;;alternate mapping
+;; (add-ido-hook " "
+;;               'ido-complete-space)
+;; (add-ido-hook [tab] 'ido-restrict-to-matches)
+;; (add-ido-hook [?\C- ] (lambda () (interactive (insert " "))))
+
 (add-ido-hook [up] 'ido-prev-match)
 (add-ido-hook [down] 'ido-next-match)
 
