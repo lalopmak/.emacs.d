@@ -22,12 +22,13 @@
 
 (tool-bar-mode -1)
 
+(require 'package)
+(package-initialize)
+
 (setq package-archives '(("melpa" . "http://melpa.milkbox.net/packages/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
                          ))
-
-(package-initialize)
 
 (defmacro do-to-package-list (packageList &rest body)
   "Does something to each package of a package list.
@@ -46,10 +47,10 @@ Current package assigned to variable 'package'."
     (package-refresh-contents))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous linum-relative centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum latex-pretty-symbols anaphora combinators kmacro-decision ;;ww3m
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous flx-ido linum-relative centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum latex-pretty-symbols anaphora combinators kmacro-decision key-chord ;;ww3m
 ;;for clojure
  auto-complete
- paredit popup  rainbow-delimiters)
+ paredit popup  rainbow-delimiters grizzl fiplr)
                     (install-if-necessary package)
                     (require package))
 
@@ -152,6 +153,13 @@ assemblage-theme
 
 (evil-mode 1)
 
+(setq key-chord-two-keys-delay .05) 
+(key-chord-define-global "tn" 'evil-normal-state)
+(key-chord-define-global "tw" 'evil-normal-state)
+(key-chord-define-global "ft" 'delete-backward-char)
+(key-chord-define-global "fn" 'delete-backward-char)
+(key-chord-mode 1)
+
 (require-online-package-else-git-clone 'stopwatch "https://github.com/lalopmak/stopwatch" )
 
 (require-online-package-else-git-clone 'expand-region "https://github.com/magnars/expand-region.el" )
@@ -219,7 +227,8 @@ assemblage-theme
 
 (require 'recentf)
 (recentf-mode 1)
-(setq recentf-max-menu-items 50)
+(setq recentf-max-menu-items 50
+      recentf-max-saved-items 100)
 
 (setq recentf-auto-cleanup 'never) ;;apparently needed for tramp
 
@@ -230,7 +239,7 @@ assemblage-theme
 (require 'ido)
 (ido-mode 'both) ;; for buffers and files
 
-(setq ido-enable-flex-matching t
+(setq ;; ido-max-prospects 9   ;how many matches in display string, needs to be just enough for max size
       ido-everywhere t
       ido-save-directory-list-file "~/.emacs.d/cache/ido.last"
       ido-case-fold  t                 ; be case-insensitive
@@ -239,6 +248,11 @@ assemblage-theme
       ido-max-work-directory-list 60   ; should be enough
       ido-max-work-file-list      100   ; remember many
       ido-use-virtual-buffers t
+
+      ido-enable-flex-matching t
+      flx-ido-mode 1
+      flx-ido-use-faces nil
+      ;; ido-use-faces nil   ;to see flx highlights
       )
 
 ;; This tab override shouldn't be necessary given ido's default
@@ -250,8 +264,19 @@ assemblage-theme
              (lambda ()
                (define-key ido-completion-map ,key ,hook))))
 
+(defun init-ido-complete-tab ()
+  "Ido-complete only if there's a common match.
+
+Otherwise, goes to the next match (C-s)"
+  (interactive)
+  (if (and (stringp ido-common-match-string)
+	   (stringp ido-text)
+           (> (length ido-common-match-string) (length ido-text)))
+      (ido-complete)
+    (ido-next-match)))
+
 (add-ido-hook [tab]
-              'ido-complete-space)
+              'init-ido-complete-tab)
 ;; (add-ido-hook " " (lambda () (interactive (insert " "))))
 (add-ido-hook " " 'ido-restrict-to-matches)
 (add-ido-hook [?\C- ] (lambda () (interactive (insert " "))))
@@ -288,6 +313,14 @@ assemblage-theme
 (ido-ubiquitous-use-new-completing-read webjump 'webjump)
 (ido-ubiquitous-use-new-completing-read yas/expand 'yasnippet)
 (ido-ubiquitous-use-new-completing-read yas/visit-snippet-file 'yasnippet)
+
+;;;;;;;;
+;;fiplr/grizzl search
+;;;;;;;;
+;; (global-set-key (kbd "M-b") 'fiplr-find-file)
+(define-key *grizzl-keymap* (kbd "C-s")   'grizzl-set-selection-1)
+(define-key *grizzl-keymap* (kbd "<tab>")    'grizzl-set-selection-1)
+(define-key *grizzl-keymap* (kbd "C-r") 'grizzl-set-selection+1) 
 
 
 ;; I want spaces for indentation
@@ -366,14 +399,16 @@ assemblage-theme
 (lalopmak-evil-directory-process "nemo")
 (lalopmak-evil-directory-process "thunar")
 
-;;ranger (in gnome-terminal)
+;;ranger (in x-terminal-emulator)
+;; (lalopmak-evil-directory-process "rgr" nil nil "ranger" "ranger") ;buggy
+
 (lalopmak-evil-directory-process "gnome-terminal"
   "--command=ranger \"%s\""
   t
   "lalopmak-evil-ranger"
   "ranger")
 
-;;gnome-terminal
+;;x-terminal-emulator
 (lalopmak-evil-directory-process "gnome-terminal"
   "--working-directory="
   nil
@@ -519,6 +554,7 @@ CHARACTER instead."))
 (defvar init-blinking-cursor t, "Whether or not the cursor should blink")
 (defvar init-cursor-color "#ffffff", "Cursor color")
 
+(defvar init-use-nlinum t, "If nil, use linum.  Otherwise, use nlinum." )
 (defvar init-relative-mode nil, "Whether or not we start out with relative line numbers")
 
 (defvar init-highlight-line-gui t, "Whether or not to highlight current line in a gui")
@@ -539,6 +575,17 @@ CHARACTER instead."))
 
 (defvar init-delayed-startup-time 15, "Time in seconds to delay init-delayed-startup-actions")
 
+(defun init-activate-keyfreq (&optional save-on-exit use-abs-times abs-times debugging)
+  "Starts keyfreq-mode with the appropriate options."
+  (interactive)
+  (when use-abs-times (setq keyfreq-use-abs-times t))
+  (when abs-times (setq keyfreq-autosave-abs-times abs-times))
+  (when debugging (setq keyfreq-debugging debugging))
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1)
+  (when save-on-exit
+    (keyfreq-save-on-exit-mode)))
+
 (defun init-delayed-startup-actions ()
   "Actions to perform after a delay."
   (when (boundp 'server-name)
@@ -546,9 +593,10 @@ CHARACTER instead."))
     ;;      alias editserver='emacsclient -a "" -s "Edit Server" -e "(edit-server-start)"'
     ;; (when (equal server-name "Edit Server")
     ;;   (edit-server-start))
-    (when (member server-name '("User Server" "Edit Server"))
-      (keyfreq-mode 1)
-      (keyfreq-autosave-mode 1))))
+    (cond ((equal server-name "User Server")
+           (init-activate-keyfreq nil t '(0 20 40) t))
+          ((equal server-name "Edit Server")
+           (init-activate-keyfreq nil t '(10 30 50) t)))))
 
 (when init-delayed-startup-time
   (run-at-time init-delayed-startup-time nil 'init-delayed-startup-actions))
@@ -556,9 +604,13 @@ CHARACTER instead."))
 ;;;;;;;
 ;; Globalized nlinum mode, until they make official one
 ;;;;;;;
-(define-globalized-minor-mode global-nlinum-mode nlinum-mode nlinum-on)
+
 (defun nlinum-on () (unless (minibufferp) (nlinum-mode 1)))
-(global-nlinum-mode 1)
+(define-globalized-minor-mode global-nlinum-mode nlinum-mode nlinum-on)
+
+(if init-use-nlinum
+    (global-nlinum-mode 1)
+  (global-linum-mode 1))
 
 ;;;;;;;;
 ;;Init Mode: stuff to happen in every buffer
@@ -571,7 +623,9 @@ CHARACTER instead."))
   (if (and init-highlight-line-terminal
            (not (display-graphic-p)))
       (hl-line-mode 1)) ; turn on highlighting current line
-  (nlinum-mode t)
+  (if init-use-nlinum
+      (nlinum-mode t)
+    (linum-mode t))
   (init-add-pretty-symbols)
   (if init-centered-cursor (centered-cursor-mode t)))
 
@@ -691,3 +745,22 @@ CHARACTER instead."))
 (setq tramp-default-method "scp")
 
 (ad-activate-all) ;activates all advice
+
+
+(defvar init-times-record "")
+
+(defun init-record-current-time ()
+  "Prints the current time into file."
+  (interactive (list (read-file-name "Record File: ")))
+  (let ((record (concat (current-time-string) "\n")))
+    (setq init-times-record (concat init-times-record record))
+    ))
+
+(defvar init-timer nil)
+
+(defun init-timer-restart ()
+  (init-record-current-time)
+(when init-timer (cancel-timer init-timer))
+(setq init-timer (run-at-time 60 nil 'init-timer-restart) ) )
+
+(init-timer-restart)

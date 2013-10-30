@@ -175,3 +175,13 @@ With SHOWHEADER non-nil, also creates a header-line if this is so."
                                       ((> width medheader-len) medheader-str)
                                       (t (funcall header short-filename 'shorten)))))
                (setq header-line-format header-str))))))
+
+;; (setq ido-max-prospects   ;how many matches in display string, needs to be just enough for max size
+;;       (let ((max-height (or ido-max-window-height
+;;                             max-mini-window-height)))
+;;         (cond ((integerp max-height) max-height)
+;;               ((display-graphic-p) (ceiling (* max-height 
+;;                                                (/ (display-pixel-height)
+;;                                                   (frame-char-height)))))
+;;               ((t (ceiling (* max-height 
+;;                               (display-pixel-height))))))))
