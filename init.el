@@ -79,8 +79,6 @@ assemblage-theme
  '(completions-common-part ((t (:inherit default :foreground "red"))))
  '(diredp-compressed-file-suffix ((t (:foreground "#7b68ee"))) t)
  '(diredp-ignored-file-name ((t (:foreground "#aaaaaa"))) t)
- ;; '(hl-line ((t (:inherit highlight :background ;#1f2f2f"
-;; "#243434"))))  ;;highlight for tangotango
  '(rainbow-delimiters-depth-1-face ((t (:foreground "#556677"))))
  '(rainbow-delimiters-depth-2-face ((t (:foreground "#8b7500"))))
  '(rainbow-delimiters-depth-3-face ((t (:foreground "#408000"))))
@@ -334,6 +332,7 @@ Otherwise, goes to the next match (C-s)"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ac-use-fuzzy t)
  '(inhibit-startup-screen t))
 
 
@@ -764,3 +763,5 @@ CHARACTER instead."))
 (setq init-timer (run-at-time 60 nil 'init-timer-restart) ) )
 
 (init-timer-restart)
+
+(define-coding-system-alias 'UTF-8 'utf-8)
