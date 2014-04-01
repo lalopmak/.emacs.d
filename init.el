@@ -47,7 +47,7 @@ Current package assigned to variable 'package'."
     (package-refresh-contents))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous flx-ido linum-relative centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum latex-pretty-symbols anaphora combinators kmacro-decision key-chord ;;ww3m
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous flx-ido linum-relative centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum ag hy-mode latex-pretty-symbols anaphora combinators kmacro-decision key-chord ;;ww3m
 ;;for clojure
  auto-complete
  paredit popup  rainbow-delimiters grizzl fiplr)
@@ -121,8 +121,8 @@ assemblage-theme
 (global-surround-mode 1)
 
 
-;; (require-online-package-else-git-clone 'evil-nerd-commenter "https://github.com/redguardtoo/evil-nerd-commenter" )
-(require-online-package-else-git-clone 'evil-nerd-commenter "https://github.com/lalopmak/evil-nerd-commenter" )
+(require-online-package-else-git-clone 'evil-nerd-commenter "https://github.com/redguardtoo/evil-nerd-commenter" )
+;; (require-online-package-else-git-clone 'evil-nerd-commenter "https://github.com/lalopmak/evil-nerd-commenter" )
 
 (define-key evil-normal-state-map "," 'evilnc-comment-operator)
 (define-key evil-visual-state-map "," 'evilnc-comment-operator)
@@ -765,3 +765,4 @@ CHARACTER instead."))
 (init-timer-restart)
 
 (define-coding-system-alias 'UTF-8 'utf-8)
+
