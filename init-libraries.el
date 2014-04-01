@@ -15,7 +15,26 @@
 ;; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+(defun join-paths (path &rest paths)
+  "Given one or more paths, joins them together,
+
+e.g. (join-paths \"~\" \".emacs.d\" \"test\") == \"~/.emacs.d/test\""
+  (if paths  
+      (apply 'join-paths 
+             (concat (file-name-as-directory path) (car paths)) 
+             (cdr paths))
+    path))
+
+(defun join-to-emacs-dir (&rest paths)
+  "Given one or more paths, joins it to the emacs user directory.
+
+ e.g. if the emacs directory is \"~/.emacs.d/\", then 
+
+ (join-to-emacs-dir \"test\" \"ing.el\") == \"~./emacs.d/test/ing.el\""
+  (apply 'join-paths user-emacs-directory paths))
+
 ;;;;;Package retrieval helpers
+
 
 ;;the base directory for online retrieved packages
 (defvar online-packages-directory "~/.emacs.d/online-packages/")
