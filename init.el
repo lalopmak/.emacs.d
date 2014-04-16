@@ -39,12 +39,10 @@ Current package assigned to variable 'package'."
 (defun install-if-necessary (package)
   "Installs a package if it is not already"
   (or (package-installed-p package)
-      (package-install package)))
-
-;; fetches the package repository lists if necessary
-(unless (and (boundp 'package-user-dir)
-             (file-exists-p package-user-dir))
-    (package-refresh-contents)) 
+      (progn
+        (unless (assoc package package-archive-contents)
+          (package-refresh-contents))
+        (package-install package))))
 
 ;; loads the listed packages, installing if necessary
 (do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous flx-ido linum-relative hlinum centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum ag hy-mode latex-pretty-symbols anaphora combinators kmacro-decision key-chord ;;ww3m
