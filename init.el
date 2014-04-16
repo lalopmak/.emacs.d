@@ -788,7 +788,7 @@ CHARACTER instead."))
 
 
 
-(defvar init-linum-relative-format-string "%2d") 
+(defvar init-linum-relative-format-string "%0d") 
 
 (add-hook 'linum-before-numbering-hook 'init-linum-relative-get-format-string)
 
@@ -814,14 +814,15 @@ CHARACTER instead."))
 (setq linum-format 'init-linum-relative-relative-line-numbers)
 
 (defun init-linum-relative-relative-line-numbers (line-number)
-
-  (let ((line-number-display (if (or (not init-linum-relative-mode)
-                                     (and init-linum-relative-show-current-line
-                                          (eq line-number init-linum-relative-current-line-number)))
-                                 line-number
-                               (abs (- line-number init-linum-relative-current-line-number)))))
-    (propertize (format init-linum-relative-format-string line-number-display) 'face 'linum
-                'font-lock-face '(:foreground "red")))) 
+  (if (minibufferp)
+      ""
+    (let ((line-number-display (if (or (not init-linum-relative-mode)
+                                       (and init-linum-relative-show-current-line
+                                            (eq line-number init-linum-relative-current-line-number)))
+                                   line-number
+                                 (abs (- line-number init-linum-relative-current-line-number)))))
+      (propertize (format init-linum-relative-format-string line-number-display) 'face 'linum
+                  'font-lock-face '(:foreground "red"))))) 
 
 (defadvice linum-update (around init-linum-relative-update)
   (let ((init-linum-relative-current-line-number (line-number-at-pos)))
@@ -844,5 +845,4 @@ CHARACTER instead."))
 (set-face-attribute 'linum-highlight-face
                     nil
                     :foreground init-linum-current-line-foreground 
-                    :background init-linum-current-line-background
-                    ) 
+                    :background init-linum-current-line-background) 
