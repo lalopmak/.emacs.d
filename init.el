@@ -194,32 +194,32 @@ assemblage-theme
 
 
 
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+;; (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
 
 
 
-(unless (require 'el-get nil 'noerror)
-  (with-current-buffer
-      (url-retrieve-synchronously
-       "https://raw.github.com/dimitri/el-get/master/el-get-install.el")
-    (goto-char (point-max))
-    (eval-print-last-sexp)))
+;; (unless (require 'el-get nil 'noerror)
+;;   (with-current-buffer
+;;       (url-retrieve-synchronously
+;;        "https://raw.github.com/dimitri/el-get/master/el-get-install.el")
+;;     (goto-char (point-max))
+;;     (eval-print-last-sexp)))
 
-(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
+;; (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
 
-(setq
- el-get-sources
- '(el-get				; el-get is self-hosting
-   ;; kill-ring-ido                     ; just gonna fork this
-   ))
+;; (setq
+;;  el-get-sources
+;;  '(el-get				; el-get is self-hosting
+;;    ;; kill-ring-ido                     ; just gonna fork this
+;;    ))
 
-;;adds the fetched el-get packages to load-path and requires them
-(do-to-package-list el-get-sources
-                    (add-to-list 'load-path (init-online-packages-directory package "~/.emacs.d/el-get/"))
-                    (require package))
+;; ;;adds the fetched el-get packages to load-path and requires them
+;; (do-to-package-list el-get-sources
+;;                     (add-to-list 'load-path (init-online-packages-directory package "~/.emacs.d/el-get/"))
+;;                     (require package))
 
-(el-get 'sync el-get-sources)
+;; (el-get 'sync el-get-sources)
 
 (require 'recentf)
 (recentf-mode 1)
