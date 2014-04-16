@@ -44,10 +44,10 @@ Current package assigned to variable 'package'."
 ;; fetches the package repository lists if necessary
 (unless (and (boundp 'package-user-dir)
              (file-exists-p package-user-dir))
-    (package-refresh-contents))
+    (package-refresh-contents)) 
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous flx-ido linum-relative centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum ag hy-mode latex-pretty-symbols anaphora combinators kmacro-decision key-chord ;;ww3m
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous flx-ido linum-relative hlinum centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum ag hy-mode latex-pretty-symbols anaphora combinators kmacro-decision key-chord ;;ww3m
 ;;for clojure
  auto-complete
  paredit popup  rainbow-delimiters grizzl fiplr)
@@ -415,24 +415,6 @@ Otherwise, goes to the next match (C-s)"
   "shell")
 (evil-ex-define-cmd "gnome-terminal" "shell")
 
-;;;;;;;;;;;;;;;;
-;;Frame title setter
-;;;;;;;;;;;;;;;;
-
-;;how to insert emacs at the end of frame: pick one
-(defvar emacs-title-format " @ emacs")
-;; (defvar emacs-title-format
-;;   (concat " @ Emacs "
-;;           emacs-version))
-
-;;sets frame title: "filename (directory) [emacs-title-format]"
-(setq frame-title-format
-      '("%b " (:eval (if (buffer-file-name)  ;adds the (directory)
-                         (concat "("
-                                 (abbreviate-file-name (file-name-directory buffer-file-name))
-                                 ")")))
-        emacs-title-format))
-
 ;;;;;;;
 ;;Ace jump
 ;;;;;;;
@@ -553,14 +535,20 @@ CHARACTER instead."))
 (defvar init-blinking-cursor t, "Whether or not the cursor should blink")
 (defvar init-cursor-color "#ffffff", "Cursor color")
 
-(defvar init-use-nlinum t, "If nil, use linum.  Otherwise, use nlinum." )
-(defvar init-relative-mode nil, "Whether or not we start out with relative line numbers")
+(defvar init-use-nlinum nil, "If nil, use linum.  Otherwise, use nlinum." )
+(defvar init-linum-relative-mode t, "Whether or not we start out with relative line numbers")
+(defvar init-linum-relative-show-current-line t, "Whether or not our relative line numbers should show the current line as absolute")
+(defvar init-linum-current-line-foreground "red", "The foreground color of the current line")
+(defvar init-linum-current-line-background nil, "The background color of the current line")
 
 (defvar init-highlight-line-gui t, "Whether or not to highlight current line in a gui")
 (defvar init-highlight-line-terminal nil, "Whether or not to highlight current line in a terminal")
 
 (defvar init-use-header-for-notify-files-changed t, "Whether or not to popup header saying that file has been externally modified")
 (defvar init-notify-files-changed-interval 5, "Time in seconds between checking for file changes")
+
+(defvar default-frame-icon "/usr/share/icons/hicolor/scalable/apps/emacs24.svg", "Default icon to use for frames, ignored if nil")
+
 
 ;;cursor blinks every that number of seconds
 (setq blink-cursor-interval 0.7)
@@ -611,6 +599,29 @@ CHARACTER instead."))
     (global-nlinum-mode 1)
   (global-linum-mode 1))
 
+;;;;;;;;;;;;;;;;
+;;Frame title and icon setter
+;;;;;;;;;;;;;;;;
+
+;;how to insert emacs at the end of frame: pick one
+(defvar emacs-title-format " @ emacs")
+;; (defvar emacs-title-format
+;;   (concat " @ Emacs "
+;;           emacs-version))
+
+;;sets frame title: "filename (directory) [emacs-title-format]"
+(setq frame-title-format
+      '("%b " (:eval (if (buffer-file-name)  ;adds the (directory)
+                         (concat "("
+                                 (abbreviate-file-name (file-name-directory buffer-file-name))
+                                 ")")))
+        emacs-title-format))
+
+(if default-frame-icon
+    (add-to-list 'default-frame-alist '(icon-type . default-frame-icon)))
+
+
+
 ;;;;;;;;
 ;;Init Mode: stuff to happen in every buffer
 ;;;;;;;;
@@ -645,8 +656,6 @@ CHARACTER instead."))
   (init-mode-on-new-buffer))
 ;;======
 
-;;linum-relative starts on by default, toggle off if necessary
-(unless init-relative-mode (linum-relative-toggle))
 
 (if init-centered-cursor (global-centered-cursor-mode t))
 
@@ -766,3 +775,70 @@ CHARACTER instead."))
 
 (define-coding-system-alias 'UTF-8 'utf-8)
 
+
+
+
+
+
+
+
+
+
+(defvar init-linum-relative-format-string "%2d") 
+
+(add-hook 'linum-before-numbering-hook 'init-linum-relative-get-format-string)
+
+;; (defun init-linum-relative-get-format-string ()
+;;   (let* ((width (length (number-to-string
+;;                          (count-lines (point-min) (point-max)))))
+;;          (format (concat "%" (number-to-string width) "d")))
+;;     (setq init-linum-relative-format-string format)))
+
+ 
+(defun init-linum-relative-get-format-string ()
+  (let* ((width (max 2
+                     (if init-linum-relative-show-current-line
+                         (length (number-to-string (line-number-at-pos))) 
+                       -1))) 
+         (format (concat "%" (number-to-string width) "d")))
+    (when init-linum-relative-mode
+      (setq init-linum-relative-format-string format))))
+
+
+(defvar init-linum-relative-current-line-number 0)
+
+(setq linum-format 'init-linum-relative-relative-line-numbers)
+
+(defun init-linum-relative-relative-line-numbers (line-number)
+
+  (let ((line-number-display (if (or (not init-linum-relative-mode)
+                                     (and init-linum-relative-show-current-line
+                                          (eq line-number init-linum-relative-current-line-number)))
+                                 line-number
+                               (abs (- line-number init-linum-relative-current-line-number)))))
+    (propertize (format init-linum-relative-format-string line-number-display) 'face 'linum
+                'font-lock-face '(:foreground "red")))) 
+
+(defadvice linum-update (around init-linum-relative-update)
+  (let ((init-linum-relative-current-line-number (line-number-at-pos)))
+    ad-do-it))
+
+(ad-activate 'linum-update)
+
+(defun init-linum-relative-toggle ()
+  "Toggles relative line numbers."
+  (interactive)
+  ;;for some reason, can't just set it to (not (init-linum-relative-mode))
+  (if init-linum-relative-mode
+      (setq init-linum-relative-mode nil)
+    (setq init-linum-relative-mode t))) 
+
+;;linum relative toggle
+(evil-ex-define-cmd "relative" 'init-linum-relative-toggle) 
+(hlinum-activate)
+
+(set-face-attribute 'linum-highlight-face
+                    nil
+                    :foreground init-linum-current-line-foreground 
+                    :background init-linum-current-line-background
+                    ) 
