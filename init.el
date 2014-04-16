@@ -45,7 +45,7 @@ Current package assigned to variable 'package'."
         (package-install package))))
 
 ;; loads the listed packages, installing if necessary
-(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous flx-ido linum-relative hlinum centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum ag hy-mode latex-pretty-symbols anaphora combinators kmacro-decision key-chord ;;ww3m
+(do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous flx-ido linum-relative hlinum centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum ag hy-mode latex-pretty-symbols anaphora combinators kmacro-decision key-chord smex ;;ww3m
 ;;for clojure
  auto-complete
  paredit popup  rainbow-delimiters grizzl fiplr)
@@ -304,11 +304,17 @@ Otherwise, goes to the next match (C-s)"
   `(eval-after-load ,package
      '(defadvice ,cmd (around ido-ubiquitous-new activate)
         (let ((ido-ubiquitous-enable-compatibility nil))
-          ad-do-it))))
+          ad-do-it)))
+) 
 
 (ido-ubiquitous-use-new-completing-read webjump 'webjump)
 (ido-ubiquitous-use-new-completing-read yas/expand 'yasnippet)
 (ido-ubiquitous-use-new-completing-read yas/visit-snippet-file 'yasnippet)
+
+;;ido for M-x
+(smex-initialize)
+(global-set-key (kbd "M-x") 'smex)
+(global-set-key (kbd "M-X") 'smex-major-mode-commands)
 
 ;;;;;;;;
 ;;fiplr/grizzl search
