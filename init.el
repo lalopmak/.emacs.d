@@ -621,8 +621,8 @@ CHARACTER instead."))
                                  ")")))
         emacs-title-format))
 
-(if default-frame-icon
-    (add-to-list 'default-frame-alist '(icon-type . default-frame-icon)))
+(when default-frame-icon
+    (add-to-list 'default-frame-alist `(icon-type . ,default-frame-icon)))
 
 
 
