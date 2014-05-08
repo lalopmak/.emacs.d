@@ -48,7 +48,7 @@ Current package assigned to variable 'package'."
 (do-to-package-list '(magit rainbow-mode yasnippet package ido-vertical-mode ido-ubiquitous flx-ido linum-relative hlinum centered-cursor-mode edit-server edit-server-htmlize ace-jump-mode imenu-anywhere markdown-mode nlinum ag hy-mode latex-pretty-symbols anaphora combinators kmacro-decision key-chord smex ;;ww3m
 ;;for clojure
  auto-complete
- paredit popup  rainbow-delimiters grizzl fiplr)
+ paredit popup  rainbow-delimiters grizzl fiplr popwin)
                     (install-if-necessary package)
                     (require package))
 
@@ -551,8 +551,9 @@ CHARACTER instead."))
 (defvar init-use-header-for-notify-files-changed t, "Whether or not to popup header saying that file has been externally modified")
 (defvar init-notify-files-changed-interval 5, "Time in seconds between checking for file changes")
 
-(defvar default-frame-icon "/usr/share/icons/hicolor/scalable/apps/emacs24.svg", "Default icon to use for frames, ignored if nil")
+(defvar default-frame-icon "/usr/share/icons/Numix-Circle/48x48/apps/emacs24.svg", "Default icon to use for frames, ignored if nil")
 
+(defvar init-use-popwin t, "Whether or not to use popwin")
 
 ;;cursor blinks every that number of seconds
 (setq blink-cursor-interval 0.7)
@@ -602,6 +603,10 @@ CHARACTER instead."))
 (if init-use-nlinum
     (global-nlinum-mode 1)
   (global-linum-mode 1))
+
+
+(when init-use-popwin
+  (popwin-mode 1))
 
 ;;;;;;;;;;;;;;;;
 ;;Frame title and icon setter
@@ -792,15 +797,11 @@ CHARACTER instead."))
 
 (add-hook 'linum-before-numbering-hook 'init-linum-relative-get-format-string)
 
-;; (defun init-linum-relative-get-format-string ()
-;;   (let* ((width (length (number-to-string
-;;                          (count-lines (point-min) (point-max)))))
-;;          (format (concat "%" (number-to-string width) "d")))
-;;     (setq init-linum-relative-format-string format)))
-
- 
 (defun init-linum-relative-get-format-string ()
-  (let* ((width (max 2
+  (let* (;; (largest-visible-line (save-excursion (goto-char (window-end))
+         ;;                                       (line-number-at-pos)))
+         ;; (largest-line (count-lines (point-min) (point-max)))
+         (width (max 2
                      (if init-linum-relative-show-current-line
                          (length (number-to-string (line-number-at-pos))) 
                        -1))) 
@@ -820,7 +821,7 @@ CHARACTER instead."))
                                        (and init-linum-relative-show-current-line
                                             (eq line-number init-linum-relative-current-line-number)))
                                    line-number
-                                 (abs (- line-number init-linum-relative-current-line-number)))))
+                                 (abs (- line-number init-linum-relative-current-line-number))))) 
       (propertize (format init-linum-relative-format-string line-number-display) 'face 'linum
                   'font-lock-face '(:foreground "red"))))) 
 
@@ -846,3 +847,5 @@ CHARACTER instead."))
                     nil
                     :foreground init-linum-current-line-foreground 
                     :background init-linum-current-line-background) 
+(add-to-list 'exec-path "~/bin")
+
